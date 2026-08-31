@@ -1,6 +1,6 @@
 name: Build
 
-# Build the dashboard and publish ghcr.io/<owner>/mobula-ui. The SPA is built
+# Build the dashboard and publish ghcr.io/<owner>/bifrost-ui. The SPA is built
 # on the runner (npm needs GitHub Packages auth for @brandonrc/mobula-client),
 # then packaged into nginx via Dockerfile.ci — the docker build itself needs
 # no registry auth. Single-arch amd64.
@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/mobula-ui
+  IMAGE: ghcr.io/${{ github.repository_owner }}/bifrost-ui
 
 jobs:
   build:

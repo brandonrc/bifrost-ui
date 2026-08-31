@@ -6,7 +6,7 @@
 #
 # Usage:
 #   npm ci && npm run build
-#   docker build -f Dockerfile.ci -t ghcr.io/brandonrc/mobula-ui:latest .
+#   docker build -f Dockerfile.ci -t ghcr.io/brandonrc/bifrost-ui:latest .
 FROM nginx:1.27-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY dist /usr/share/nginx/html

@@ -1,4 +1,4 @@
-# Mobula UI — wiring inventory
+# Bifrost UI — wiring inventory
 
 Source of truth for **what is actually hooked up**: every UI surface (route /
 tab / page) → the control-plane endpoint(s) it calls → status. Keep this

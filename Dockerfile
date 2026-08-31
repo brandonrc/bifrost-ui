@@ -2,7 +2,7 @@
 # control-plane API reverse-proxied (see nginx.conf).
 #
 # The typed API client is consumed as a LOCAL dependency at ./vendor/
-# mobula-client (generated from mobula's openapi.json by deploy/up.sh), so
+# mobula-client (generated from the backend's openapi.json by deploy/up.sh), so
 # the image builds with no GitHub Packages / npm auth. In a normal (non-
 # compose) build the package comes from GHCR instead; here we override it.
 FROM node:22-alpine AS build
