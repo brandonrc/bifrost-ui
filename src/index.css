@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 3.9%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --secondary-foreground: hsl(240 5.9% 10%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
+  --accent: hsl(240 4.8% 95.9%);
+  --accent-foreground: hsl(240 5.9% 10%);
+  --destructive: hsl(0 72.2% 50.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
+  --ring: hsl(240 5.9% 10%);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(240 10% 3.9%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(240 6% 7%);
+  --card-foreground: hsl(0 0% 98%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(240 5.9% 10%);
+  --secondary: hsl(240 3.7% 15.9%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 3.7% 15.9%);
+  --muted-foreground: hsl(240 5% 64.9%);
+  --accent: hsl(240 3.7% 15.9%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: hsl(0 62.8% 50.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 15.9%);
+  --ring: hsl(240 4.9% 83.9%);
+}
+
+/*
+ * Configurable palette. The neutral tokens above are the base; a named theme
+ * is selected with `data-theme` on <html> (see index.html, default "nebari").
+ * Drop the attribute for the neutral base, or add another `[data-theme="x"]`
+ * block to introduce a new brand palette — nothing else changes.
+ *
+ * Nebari brand palette (nebari-dev/nebari-design): magenta primary, teal/green
+ * accents, blue-graphite dark ground. Values are Nebari's own oklch tokens.
+ */
+:root[data-theme='nebari'] {
+  --background: oklch(97.91% 0 0);
+  --foreground: oklch(26.94% 0.0037 286.15);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(26.94% 0.0037 286.15);
+  --primary: oklch(55.06% 0.1886 311.45);
+  --primary-foreground: oklch(98% 0 0);
+  --secondary: oklch(95.04% 0.0042 236.5);
+  --secondary-foreground: oklch(26.94% 0.0037 286.15);
+  --muted: oklch(95.04% 0.0042 236.5);
+  --muted-foreground: oklch(50% 0.012 250);
+  --accent: oklch(95.04% 0.0042 236.5);
+  --accent-foreground: oklch(26.94% 0.0037 286.15);
+  --border: oklch(91% 0.006 250);
+  --input: oklch(91% 0.006 250);
+  --ring: oklch(61.98% 0.2159 311.67);
+}
+
+.dark[data-theme='nebari'],
+:root[data-theme='nebari'].dark {
+  --background: oklch(26.95% 0.0219 254.2);
+  --foreground: oklch(97.94% 0.0013 286.38);
+  --card: oklch(31% 0.022 254.2);
+  --card-foreground: oklch(97.94% 0.0013 286.38);
+  --primary: oklch(61.98% 0.2159 311.67);
+  --primary-foreground: oklch(98% 0 0);
+  --secondary: oklch(40% 0.0269 250.57);
+  --secondary-foreground: oklch(97.94% 0.0013 286.38);
+  --muted: oklch(40% 0.0269 250.57);
+  --muted-foreground: oklch(74% 0.02 250);
+  --accent: oklch(40% 0.0269 250.57);
+  --accent-foreground: oklch(97.94% 0.0013 286.38);
+  --border: oklch(40% 0.0269 250.57);
+  --input: oklch(40% 0.0269 250.57);
+  --ring: oklch(69.98% 0.1926 311.48);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}

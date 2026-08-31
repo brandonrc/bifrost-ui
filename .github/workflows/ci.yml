@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          # @brandonrc/mobula-client comes from GitHub Packages; the .npmrc
+          # reads NODE_AUTH_TOKEN. GITHUB_TOKEN has read:packages here.
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@brandonrc"
+      - name: Install
+        run: npm install --no-audit --no-fund
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

@@ -1,0 +1,153 @@
+# Bifrost UI
+
+Management console for [Bifrost](../bifrost), the Go control plane for Ray
+and Dask clusters — a self-hosted, FOSS replacement for the Anyscale console.
+Forked from [mobula-ui](https://github.com/brandonrc/mobula-ui) (Bifrost's
+Rust predecessor); the UI is backend-agnostic and talks only to the
+generated OpenAPI client, so the fork is a rename, not a rewrite.
+
+The authoritative product/UX spec is [`docs/ui-ux-spec.md`](docs/ui-ux-spec.md).
+
+## TODO: swap the API client
+
+This app still depends on `@brandonrc/mobula-client` (see below). Once
+`@brandonrc/bifrost-client@0.1.x` is published from the bifrost-api pipeline,
+swap the import paths: `grep -rl "@brandonrc/mobula-client" src/` and replace
+with `@brandonrc/bifrost-client` in both `package.json` and `src/`.
+
+**Status: Milestone A (Foundation)** — app shell, design system, dev-mode auth,
+health indicator, and read-only screens against the Phase-2 backend. Cluster
+list and Registry render the typed table UI now and gracefully show
+"not implemented yet" empty states until the Phase 3 management API
+(spec §8) exists.
+
+## API types are the source of truth
+
+This app does **not** hand-write API shapes or point a codegen tool at a
+running server. It depends on
+`@brandonrc/mobula-client` — a TypeScript client generated and published by
+the [mobula-api](https://github.com/brandonrc/mobula-api) pipeline from
+mobula's OpenAPI spec (the Rust code is the source of truth). It republishes
+to the GitHub Packages npm registry whenever the API changes. `src/lib/api.ts` re-exports those types.
+
+GitHub Packages npm requires a token even for public packages, so `.npmrc`
+reads `NODE_AUTH_TOKEN`:
+
+```sh
+export NODE_AUTH_TOKEN=$(gh auth token)   # or a classic PAT w/ read:packages
+npm install
+```
+
+CI supplies `secrets.GITHUB_TOKEN`. Types annotated "UI-ahead" in
+`src/lib/api.ts` (identity, registry, the cluster list view model) are
+screens built before the matching endpoint/shape exists in the backend;
+each carries a migration note for when it lands.
+
+## Stack
+
+React 19 + TypeScript + Vite · TanStack Query (polling) · TanStack Table ·
+react-router v7 · Tailwind CSS v4 + Radix primitives (hand-rolled shadcn-style
+components in `src/components/ui`) · class-based dark mode.
+
+## Prerequisites
+
+- Node.js 20+
+- The backend running locally: `mobula serve --dev-allow-unauthenticated`
+  (serves `http://127.0.0.1:8484`; the Vite dev server proxies `/api`,
+  `/healthz`, and `/docs` to it)
+
+## Getting started
+
+```sh
+npm install
+npm run dev        # http://localhost:5173
+```
+
+## Scripts
+
+| Command           | What it does                                                          |
+| ----------------- | --------------------------------------------------------------------- |
+| `npm run dev`     | Vite dev server with proxy to the control plane                        |
+| `npm run build`   | Type-check (`tsc -b`) + production build to `dist/`                    |
+| `npm test`        | Vitest unit tests                                                      |
+| `npm run lint`    | ESLint (flat config)                                                   |
+
+API types are not generated here — they come from the published
+`@brandonrc/mobula-client` package (see above).
+
+## Auth (provider-driven: SSO redirect or local login)
+
+`/login` discovers its sign-in methods from `GET /api/v1/auth/providers`
+(api-v1.md §5.15, ADR-0011): a **local username/password form** when the
+backend runs `--local-auth` (opaque tokens — Mobula stores credentials,
+never signs them), **"Sign in with SSO"** when OIDC is configured, or both.
+The SSO path is Authorization Code + PKCE (S256) directly against the
+issuer — the standard SPA pattern, no client secret and no backend session
+endpoints (api-v1.md §5.11's backend-mediated login remains the future
+standalone-mode contract). The flow: `/login` redirects to
+`{issuer}/protocol/openid-connect/auth`, `/auth/callback` validates `state`
+and exchanges the code, the access token is stored in localStorage and sent
+as `Authorization: Bearer` on every API call, and a stored refresh token
+drives silent refresh on expiry. Sign out follows the session source: SSO
+sessions redirect through the issuer's logout endpoint so the IdP session
+dies too; local sessions revoke the PAT server-side first. A 401 on an
+authenticated request clears the session and pages render a "sign in
+required" state with an SSO button.
+
+Two demo stacks exercise this (see the backend's `deploy/README.md`):
+
+- `./deploy/up.sh auth` — Keycloak at `http://localhost:8090` (realm
+  `mobula`, public client `mobula`, users `admin`/`operator`/`developer`/
+  `viewer`, password = username). The login page offers SSO.
+- The local-auth demo variant (`mobula serve --local-auth` with
+  `MOBULA_LOCAL_ADMIN_PASSWORD=admin`) — the login page renders the
+  username/password form (`admin`/`admin`).
+
+The SSO issuer falls back to `VITE_MOBULA_ISSUER` (default
+`http://localhost:8090/realms/mobula`) only on backends that predate
+`/api/v1/auth/providers`; when the backend reports an issuer it wins.
+Paste-a-JWT sign-in remains as a collapsed "advanced" option on `/login`
+for `mobula token`-minted service tokens (see the curl password-grant
+one-liner rendered there).
+
+With no token, a feature flag still controls the dev-auth stub that assumes
+a fake **Admin** identity, so the unauthenticated demo stack
+(`mobula serve --dev-allow-unauthenticated`) keeps working:
+
+- `VITE_MOBULA_DEV_AUTH=true|false` — defaults to **on** under `vite dev`,
+  **off** in production builds.
+- With the flag off and no token, the shell offers a "Sign in" chip.
+
+## Project layout
+
+```
+src/
+├── auth/auth-context.tsx      # Token session (SSO/paste) + dev-mode auth stub
+├── components/
+│   ├── ui/                    # Base components (button, card, badge, table, input, dialog)
+│   ├── layout/                # App shell: sidebar, top bar, health indicator, identity chip
+│   ├── cluster-state-badge.tsx# The one ClusterState badge — 9 variants (spec §6)
+│   ├── data-table.tsx         # TanStack Table renderer
+│   └── empty-state.tsx        # first-run / no-results / unreachable / denied variants
+├── lib/
+│   ├── api.ts                 # Typed fetch wrapper + MobulaApiError (status, required/granted role)
+│   ├── auth-token.ts          # JWT decode, groups→roles mapping, session precedence, token store
+│   ├── pkce.ts                # SSO redirect: PKCE S256, authorize/logout URLs, code exchange, refresh
+│   ├── providers.ts           # /auth/providers discovery, local-login errors, sign-out path selection
+│   ├── cluster-state.ts       # ClusterState → presentation mapping (single source of truth)
+│   ├── health.ts              # /healthz + /version → green/amber/red reducer
+│   └── theme.tsx              # Class-based dark mode
+└── routes/                    # One file per route in the IA (spec §4)
+```
+
+## Conventions worth knowing
+
+- **State-machine fidelity**: the UI never invents cluster states. All badge
+  rendering goes through `src/lib/cluster-state.ts`, which maps 1:1 to the
+  backend's 9-state `ClusterState`.
+- **Fail-closed errors**: API errors surface as `MobulaApiError` with
+  `requiredRole`/`grantedRole` so 403s can render the denial (spec §1.4.6);
+  404s from not-yet-implemented endpoints render a dedicated empty state.
+- **Secrets are write-only**: the registry table shows "token set / not set",
+  never a value or a reveal button.
+- **No iframes anywhere** (D3/D6); the Swagger UI is linked, not embedded.

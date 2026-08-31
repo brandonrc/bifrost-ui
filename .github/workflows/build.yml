@@ -1,0 +1,63 @@
+name: Build
+
+# Build the dashboard and publish ghcr.io/<owner>/mobula-ui. The SPA is built
+# on the runner (npm needs GitHub Packages auth for @brandonrc/mobula-client),
+# then packaged into nginx via Dockerfile.ci — the docker build itself needs
+# no registry auth. Single-arch amd64.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/mobula-ui
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      packages: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        # @brandonrc/mobula-client is pulled from GitHub Packages (see
+        # .npmrc). GITHUB_TOKEN usually cannot read a package published from
+        # a DIFFERENT repo (mobula-api) unless this repo has been granted
+        # access on the package's settings page. If `npm ci` fails with
+        # 401/403 from npm.pkg.github.com, either grant this repo access at
+        # https://github.com/users/brandonrc/packages/npm/mobula-client/settings
+        # or create a classic PAT with read:packages and save it as the
+        # MOBULA_CLIENT_READ_TOKEN secret — it takes precedence automatically.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.MOBULA_CLIENT_READ_TOKEN || secrets.GITHUB_TOKEN }}
+        run: npm ci
+
+      - name: Build SPA
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image (amd64)
+        run: |
+          SHORT=${GITHUB_SHA::7}
+          docker build -f Dockerfile.ci \
+            -t "$IMAGE:latest" \
+            -t "$IMAGE:sha-${SHORT}" .
+          docker push "$IMAGE:latest"
+          docker push "$IMAGE:sha-${SHORT}"

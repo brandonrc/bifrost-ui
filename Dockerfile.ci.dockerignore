@@ -1,0 +1,5 @@
+# BuildKit per-Dockerfile ignore for Dockerfile.ci: the image only needs the
+# pre-built dist/ and nginx.conf (the repo-wide .dockerignore excludes dist).
+*
+!dist
+!nginx.conf

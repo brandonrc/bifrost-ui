@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- data-theme selects the palette (src/index.css). "nebari" is the default;
+     remove it for the neutral base, or set another named theme. -->
+<html lang="en" data-theme="nebari">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bifrost UI</title>
+    <script>
+      // Apply persisted theme before first paint to avoid a flash.
+      ;(function () {
+        var theme = localStorage.getItem('mobula-ui-theme') || 'dark'
+        document.documentElement.classList.toggle('dark', theme === 'dark')
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
