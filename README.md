@@ -1,19 +1,20 @@
 # Bifrost UI
 
-Management console for [Bifrost](../bifrost), the Go control plane for Ray
-and Dask clusters — a self-hosted, FOSS replacement for the Anyscale console.
-Forked from [mobula-ui](https://github.com/brandonrc/mobula-ui) (Bifrost's
-Rust predecessor); the UI is backend-agnostic and talks only to the
-generated OpenAPI client, so the fork is a rename, not a rewrite.
+Management console for [Bifrost](https://github.com/brandonrc/bifrost), the
+Go control plane for Ray and Dask clusters — a self-hosted, FOSS replacement
+for the Anyscale console. The UI is backend-agnostic: every API shape comes
+from the generated OpenAPI client, never hand-written.
 
 The authoritative product/UX spec is [`docs/ui-ux-spec.md`](docs/ui-ux-spec.md).
 
 ## TODO: swap the API client
 
-This app still depends on `@brandonrc/mobula-client` (see below). Once
-`@brandonrc/bifrost-client@0.1.x` is published from the bifrost-api pipeline,
-swap the import paths: `grep -rl "@brandonrc/mobula-client" src/` and replace
-with `@brandonrc/bifrost-client` in both `package.json` and `src/`.
+This app currently depends on a legacy generated client package
+(`@brandonrc/mobula-client`). Once `@brandonrc/bifrost-client@0.1.x` is
+published from the [bifrost-api](https://github.com/brandonrc/bifrost-api)
+pipeline, swap the import paths: `grep -rl "@brandonrc/mobula-client" src/`
+and replace with `@brandonrc/bifrost-client` in both `package.json` and
+`src/`.
 
 **Status: Milestone A (Foundation)** — app shell, design system, dev-mode auth,
 health indicator, and read-only screens against the Phase-2 backend. Cluster
@@ -24,11 +25,11 @@ list and Registry render the typed table UI now and gracefully show
 ## API types are the source of truth
 
 This app does **not** hand-write API shapes or point a codegen tool at a
-running server. It depends on
-`@brandonrc/mobula-client` — a TypeScript client generated and published by
-the [mobula-api](https://github.com/brandonrc/mobula-api) pipeline from
-mobula's OpenAPI spec (the Rust code is the source of truth). It republishes
-to the GitHub Packages npm registry whenever the API changes. `src/lib/api.ts` re-exports those types.
+running server. It depends on a TypeScript client generated from the frozen
+Bifrost API contract (see
+[bifrost-api](https://github.com/brandonrc/bifrost-api)), published to the
+GitHub Packages npm registry whenever the API changes.
+`src/lib/api.ts` re-exports those types.
 
 GitHub Packages npm requires a token even for public packages, so `.npmrc`
 reads `NODE_AUTH_TOKEN`:
