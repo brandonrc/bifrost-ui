@@ -14,8 +14,38 @@ import { issuerBase } from './auth-token'
  * access token expires.
  */
 
-/** Public client configured on the issuer (local Keycloak: `mobula`). */
-export const SSO_CLIENT_ID = 'mobula'
+/**
+ * Public client id configured on the issuer, when nothing overrides it — the
+ * local Keycloak demo realm's client.
+ */
+export const DEFAULT_SSO_CLIENT_ID = 'mobula'
+
+/**
+ * The OIDC public client id to authenticate as.
+ *
+ * Read at call time from `VITE_BIFROST_SSO_CLIENT_ID`, not frozen into a
+ * module constant, because the id is a *per-deployment* value. An operator
+ * that provisions the Keycloak client — Nebari's, for one, which derives a
+ * deterministic `<namespace>-<nebariapp-name>` such as
+ * `bifrost-bifrost-ui-spa` — cannot be asked to match a literal baked into
+ * our bundle. Hardcoding it meant this UI could only ever talk to a client
+ * someone had hand-created under one specific name, which is why gateway auth
+ * could not be turned on for the operator-provisioned deployment at all.
+ *
+ * Mirrors `issuerBase()`: same shape, same fallback-to-default behaviour, so
+ * a standalone build with no env set behaves exactly as before.
+ *
+ * Note for whoever wires up audience handling: the client id and the token's
+ * `aud` are deliberately *separate* values here. Separate NebariApps for the
+ * API and the UI mean separate client ids, so a token minted for this client
+ * carries an `aud` the Bifrost validator will reject unless a Keycloak
+ * audience mapper or an explicit `auth.oidc.audience` says otherwise. Do not
+ * derive one from the other — that would silently couple two things that a
+ * deployment needs to set independently.
+ */
+export function ssoClientId(): string {
+  return import.meta.env.VITE_BIFROST_SSO_CLIENT_ID || DEFAULT_SSO_CLIENT_ID
+}
 
 export interface PkceState {
   state: string
@@ -196,7 +226,7 @@ export async function startSsoSignIn(
   window.location.assign(
     buildAuthorizeUrl({
       issuer,
-      clientId: SSO_CLIENT_ID,
+      clientId: ssoClientId(),
       redirectUri: ssoRedirectUri(),
       state,
       codeChallenge: challenge,
@@ -216,7 +246,7 @@ export async function exchangeCodeForTokens(
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       grant_type: 'authorization_code',
-      client_id: SSO_CLIENT_ID,
+      client_id: ssoClientId(),
       redirect_uri: redirectUri,
       code,
       code_verifier: entry.verifier,
@@ -240,7 +270,7 @@ export async function refreshTokens(
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       grant_type: 'refresh_token',
-      client_id: SSO_CLIENT_ID,
+      client_id: ssoClientId(),
       refresh_token: refreshToken,
     }),
   })
