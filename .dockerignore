@@ -3,5 +3,9 @@ dist
 .git
 .github
 *.log
-# NOTE: vendor/ is intentionally NOT ignored — the Dockerfile installs the
-# locally-generated @brandonrc/mobula-client from vendor/mobula-client.
+# vendor/ held a locally-generated copy of the old @brandonrc/mobula-client.
+# The Dockerfile now installs @brandonrc/bifrost-client from GitHub Packages
+# per package-lock.json, so the directory is build input no longer — and it was
+# never tracked in git, which is why the old build only worked on a machine
+# that had run the generator.
+vendor
