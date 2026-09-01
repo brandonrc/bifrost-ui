@@ -20,7 +20,7 @@ const SOURCE_TITLE: Record<SessionSource, string> = {
   sso: 'Signed in via SSO',
   local: 'Signed in via local auth',
   pat: 'Signed in with a pasted token',
-  dev: 'Dev-mode identity (VITE_MOBULA_DEV_AUTH)',
+  dev: 'Dev-mode identity (VITE_BIFROST_DEV_AUTH)',
   none: '',
 }
 

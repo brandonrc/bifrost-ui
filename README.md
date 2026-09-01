@@ -95,7 +95,7 @@ Two demo stacks exercise this (see the backend's `deploy/README.md`):
   `BIFROST_LOCAL_ADMIN_PASSWORD=admin`) — the login page renders the
   username/password form (`admin`/`admin`).
 
-The SSO issuer falls back to `VITE_MOBULA_ISSUER` (default
+The SSO issuer falls back to `VITE_BIFROST_ISSUER` (default
 `http://localhost:8090/realms/mobula`) only on backends that predate
 `/api/v1/auth/providers`; when the backend reports an issuer it wins.
 Paste-a-JWT sign-in remains as a collapsed "advanced" option on `/login`
@@ -106,7 +106,7 @@ With no token, a feature flag still controls the dev-auth stub that assumes
 a fake **Admin** identity, so the unauthenticated demo stack
 (`bifrost serve --dev-allow-unauthenticated`) keeps working:
 
-- `VITE_MOBULA_DEV_AUTH=true|false` — defaults to **on** under `vite dev`,
+- `VITE_BIFROST_DEV_AUTH=true|false` — defaults to **on** under `vite dev`,
   **off** in production builds.
 - With the flag off and no token, the shell offers a "Sign in" chip.
 

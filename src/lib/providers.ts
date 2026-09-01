@@ -35,7 +35,7 @@ export function parseProviders(body: unknown): AuthProviders | null {
 
 /**
  * Discovery for backends that predate `/api/v1/auth/providers` (404) or
- * serve a malformed body: SSO only when VITE_MOBULA_ISSUER was explicitly
+ * serve a malformed body: SSO only when VITE_BIFROST_ISSUER was explicitly
  * set (the built-in default points at a Keycloak that may not exist), no
  * local form; the paste-token path is always available regardless.
  */

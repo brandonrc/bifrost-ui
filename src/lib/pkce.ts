@@ -31,7 +31,8 @@ export interface TokenResponse {
   refresh_token?: string
 }
 
-const PKCE_STORAGE_KEY = 'mobula.pkce'
+/** sessionStorage key for the in-flight PKCE attempt (exported for tests). */
+export const PKCE_STORAGE_KEY = 'bifrost.pkce'
 
 function bytesToBase64Url(bytes: Uint8Array): string {
   let binary = ''

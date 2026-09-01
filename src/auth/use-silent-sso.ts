@@ -39,7 +39,7 @@ export function useSilentSso(): void {
   const settled = !providersQuery.isPending
   const providers = settled
     ? ((providersQuery.isSuccess ? parseProviders(providersQuery.data) : null) ??
-      fallbackProviders(import.meta.env.VITE_MOBULA_ISSUER))
+      fallbackProviders(import.meta.env.VITE_BIFROST_ISSUER))
     : null
 
   useEffect(() => {

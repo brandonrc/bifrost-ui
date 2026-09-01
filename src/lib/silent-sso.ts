@@ -17,7 +17,7 @@ import type { AuthProviders } from './providers'
  */
 
 /** sessionStorage key marking that this tab already tried silent SSO. */
-export const SILENT_SSO_ATTEMPTED_KEY = 'mobula.sso.silent-attempted'
+export const SILENT_SSO_ATTEMPTED_KEY = 'bifrost.sso.silent-attempted'
 
 function defaultSessionStorage(): Storage | undefined {
   return typeof window !== 'undefined' ? window.sessionStorage : undefined

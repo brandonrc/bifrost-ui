@@ -423,7 +423,7 @@ export function AccessPage() {
       case 'pat':
         return 'Decoded client-side from the pasted token (the backend validates the signature).'
       default:
-        return 'Dev-mode stub identity (VITE_MOBULA_DEV_AUTH) — shown until /api/v1/identity and OIDC login exist.'
+        return 'Dev-mode stub identity (VITE_BIFROST_DEV_AUTH) — shown until /api/v1/identity and OIDC login exist.'
     }
   })()
 
