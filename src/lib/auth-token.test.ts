@@ -82,20 +82,20 @@ describe('withReportedRoles', () => {
   const base: Identity = {
     subject: 'admin',
     email: 'admin@example.com',
-    groups: ['mobula-admins', 'team-a'],
+    groups: ['bifrost-admins', 'team-a'],
     roles: [], // client-side parse missed the deployment's group names
   }
 
   it('adopts the backend-reported roles over the session identity', () => {
     const reported: Identity = {
       subject: 'a1b2-uuid',
-      groups: ['mobula-admins'],
+      groups: ['bifrost-admins'],
       roles: ['admin'],
     }
     expect(withReportedRoles(base, reported)).toEqual({
       subject: 'admin',
       email: 'admin@example.com',
-      groups: ['mobula-admins', 'team-a'],
+      groups: ['bifrost-admins', 'team-a'],
       roles: ['admin'], // authorization comes from the server
     })
   })
@@ -108,7 +108,7 @@ describe('withReportedRoles', () => {
     })
     expect(merged.subject).toBe('admin')
     expect(merged.email).toBe('admin@example.com')
-    expect(merged.groups).toEqual(['mobula-admins', 'team-a'])
+    expect(merged.groups).toEqual(['bifrost-admins', 'team-a'])
     expect(merged.roles).toEqual(['operator', 'developer'])
   })
 
@@ -196,22 +196,22 @@ describe('resolveSession precedence', () => {
   it('an opaque local-auth token uses the login-time identity from meta', () => {
     const identity: Identity = { subject: 'admin', groups: [], roles: ['admin'] }
     const session = resolveSession({
-      token: 'mob_a1b2c3d4_deadbeef',
+      token: 'bfr_a1b2c3d4_deadbeef',
       meta: { kind: 'local', identity, expiresAt: FUTURE },
       now: NOW,
     })
-    expect(session).toEqual({ token: 'mob_a1b2c3d4_deadbeef', identity, source: 'local' })
+    expect(session).toEqual({ token: 'bfr_a1b2c3d4_deadbeef', identity, source: 'local' })
   })
 
   it('an opaque token without a stored identity is not a session', () => {
-    expect(resolveSession({ token: 'mob_a1b2c3d4_deadbeef', now: NOW })).toEqual({
+    expect(resolveSession({ token: 'bfr_a1b2c3d4_deadbeef', now: NOW })).toEqual({
       token: null,
       identity: null,
       source: 'none',
     })
     expect(
       resolveSession({
-        token: 'mob_a1b2c3d4_deadbeef',
+        token: 'bfr_a1b2c3d4_deadbeef',
         meta: { kind: 'local' },
         now: NOW,
       }).source,

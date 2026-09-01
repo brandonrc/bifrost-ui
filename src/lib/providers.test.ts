@@ -45,7 +45,7 @@ describe('parseProviders', () => {
 })
 
 describe('fallbackProviders (older backend, no /auth/providers)', () => {
-  it('offers SSO when VITE_MOBULA_ISSUER is explicitly set', () => {
+  it('offers SSO when VITE_BIFROST_ISSUER is explicitly set', () => {
     expect(fallbackProviders('https://idp.example.com')).toEqual({
       local: false,
       oidc: { issuer: 'https://idp.example.com' },

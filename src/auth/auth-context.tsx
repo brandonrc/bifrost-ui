@@ -37,7 +37,7 @@ import { clearSilentSsoAttempt } from '@/lib/silent-sso'
  * verification — the backend validates on every request.
  */
 export function isDevAuthEnabled(): boolean {
-  const flag = import.meta.env.VITE_MOBULA_DEV_AUTH
+  const flag = import.meta.env.VITE_BIFROST_DEV_AUTH
   if (flag === 'true') return true
   if (flag === 'false') return false
   // Default on in `vite dev`, off in production builds unless opted in.

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 type Theme = 'light' | 'dark'
 
-const STORAGE_KEY = 'mobula-ui-theme'
+const STORAGE_KEY = 'bifrost-ui-theme'
 
 interface ThemeContextValue {
   theme: Theme

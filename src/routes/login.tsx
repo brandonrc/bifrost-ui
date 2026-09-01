@@ -19,7 +19,7 @@ import { fallbackProviders, loginErrorMessage, parseProviders } from '@/lib/prov
  * runs `--local-auth` (ADR-0011), "Sign in with SSO" when OIDC is
  * configured (the backend-reported issuer overrides the VITE default), or
  * both. Backends that predate the endpoint (404) fall back to
- * VITE_MOBULA_ISSUER-based SSO. Paste-a-token stays as a collapsed
+ * VITE_BIFROST_ISSUER-based SSO. Paste-a-token stays as a collapsed
  * advanced option for `bifrost token`-minted service tokens.
  */
 export function LoginPage() {
@@ -35,7 +35,7 @@ export function LoginPage() {
   const providers = providersQuery.isPending
     ? null
     : (providersQuery.isSuccess ? parseProviders(providersQuery.data) : null) ??
-      fallbackProviders(import.meta.env.VITE_MOBULA_ISSUER)
+      fallbackProviders(import.meta.env.VITE_BIFROST_ISSUER)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -239,7 +239,7 @@ export function LoginPage() {
   -d username=admin -d password=admin | jq -r .access_token`}
             </pre>
             <p>
-              Set <code className="text-foreground">VITE_MOBULA_ISSUER</code> to
+              Set <code className="text-foreground">VITE_BIFROST_ISSUER</code> to
               point at a different issuer when the backend does not report one.
             </p>
           </CardContent>

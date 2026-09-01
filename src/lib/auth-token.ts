@@ -22,20 +22,20 @@ export const SESSION_META_STORAGE_KEY = 'mobula.session'
  * request — the token we hold is expired or revoked, so the session is
  * cleared and the UI routes to sign-in.
  */
-export const SESSION_EXPIRED_EVENT = 'mobula:session-expired'
+export const SESSION_EXPIRED_EVENT = 'bifrost:session-expired'
 
-/** Default local Keycloak issuer; override with VITE_MOBULA_ISSUER. */
+/** Default local Keycloak issuer; override with VITE_BIFROST_ISSUER. */
 export const DEFAULT_ISSUER = 'http://localhost:8090/realms/mobula'
 
 export function issuerBase(): string {
-  return import.meta.env.VITE_MOBULA_ISSUER || DEFAULT_ISSUER
+  return import.meta.env.VITE_BIFROST_ISSUER || DEFAULT_ISSUER
 }
 
 /**
  * Group path → role, a BEST-EFFORT fallback only. This mirrors the local
  * demo's `deploy/keycloak/auth.toml`, but the group→role mapping is
  * per-deployment (a real cluster's realm uses its own group names, e.g.
- * `mobula-admins`), so this static map cannot be correct everywhere and
+ * `bifrost-admins`), so this static map cannot be correct everywhere and
  * MUST NOT be the authority on the caller's role.
  *
  * The single source of truth is the backend: `GET /api/v1/identity` returns
@@ -163,7 +163,7 @@ export type SessionSource = 'sso' | 'local' | 'pat' | 'dev' | 'none'
 
 /**
  * Session metadata, persisted alongside the token. Local-auth tokens are
- * opaque (`mob_<prefix>_<hex>`, ADR-0011) — they never decode as JWTs, so
+ * opaque (`bfr_<prefix>_<hex>`, ADR-0011) — they never decode as JWTs, so
  * the display identity comes from the login response and is stored here.
  * For SSO sessions this records which issuer to refresh/logout against.
  */
