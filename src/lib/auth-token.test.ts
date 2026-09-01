@@ -132,7 +132,7 @@ describe('identityFromToken', () => {
       mint({
         sub: '9f2c-uuid',
         preferred_username: 'admin',
-        email: 'admin@mobula.local',
+        email: 'admin@bifrost.local',
         groups: ['/platform-admins'],
         exp: FUTURE,
       }),
@@ -140,7 +140,7 @@ describe('identityFromToken', () => {
     )
     expect(identity).toEqual({
       subject: 'admin',
-      email: 'admin@mobula.local',
+      email: 'admin@bifrost.local',
       groups: ['/platform-admins'],
       roles: ['admin'],
     })
@@ -163,8 +163,8 @@ describe('identityFromToken', () => {
 })
 
 const DEV_IDENTITY: Identity = {
-  subject: 'dev-admin@mobula.local',
-  email: 'dev-admin@mobula.local',
+  subject: 'dev-admin@bifrost.local',
+  email: 'dev-admin@bifrost.local',
   groups: ['platform-admins'],
   roles: ['admin'],
 }
