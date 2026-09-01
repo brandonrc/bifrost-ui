@@ -40,7 +40,29 @@ RUN --mount=type=secret,id=node_auth_token \
 COPY . .
 RUN npm run build
 
-FROM nginx@sha256:db35bfc6b2951e7f8a72db5db120288c127ffaeeb4a6d4b95a26fead017d5913
+# nginx-unprivileged, not stock nginx, and the difference is not cosmetic.
+#
+# Stock nginx runs its master process as root and its entrypoint chowns
+# /var/cache/nginx at startup, which needs CAP_CHOWN. A hardened deployment
+# drops all capabilities — bifrost-pack's chart sets
+# `capabilities: drop: ["ALL"]`, which is correct — and the container then dies
+# before serving a byte:
+#
+#   nginx: [emerg] chown("/var/cache/nginx/client_temp", 101) failed
+#                  (1: Operation not permitted)
+#
+# That is a CrashLoopBackOff on a real cluster, found by deploying it. The
+# answer is an image that never needs the capability rather than a chart that
+# hands it back: this variant runs as uid 101 with its cache dirs already
+# owned, so nothing chowns anything.
+#
+# The port moves with it. An unprivileged process cannot bind :80 without
+# CAP_NET_BIND_SERVICE, so this listens on 8080 — and that number has to move
+# in lockstep everywhere it is named: nginx.conf's `listen`, any chart's
+# containerPort, the Service targetPort, and any ConfigMap that overrides this
+# conf. Applying only part of that set yields a silent 502 rather than a
+# crash, which is harder to diagnose than the bug it replaces.
+FROM nginxinc/nginx-unprivileged@sha256:d9083fe47768377ef55dedafd67d4da7c2f2bc2bece7554954f29359deb0dce9
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
