@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { api } from '@/lib/api'
 import { issuerBase } from '@/lib/auth-token'
-import { startSsoSignIn } from '@/lib/pkce'
+import { ssoClientId, startSsoSignIn } from '@/lib/pkce'
 import { fallbackProviders, loginErrorMessage, parseProviders } from '@/lib/providers'
 
 /**
@@ -235,7 +235,7 @@ export function LoginPage() {
             </p>
             <pre className="overflow-x-auto rounded-md border bg-muted/50 p-3 font-mono text-xs text-foreground">
 {`curl -s ${issuerBase()}/protocol/openid-connect/token \\
-  -d grant_type=password -d client_id=mobula \\
+  -d grant_type=password -d client_id=${ssoClientId()} \\
   -d username=admin -d password=admin | jq -r .access_token`}
             </pre>
             <p>
