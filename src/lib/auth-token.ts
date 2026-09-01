@@ -13,9 +13,9 @@ import type { Identity, Role } from './api'
  * can lie to the UI but gets 401/403 from the API.
  */
 
-export const TOKEN_STORAGE_KEY = 'mobula.token'
-export const REFRESH_TOKEN_STORAGE_KEY = 'mobula.refresh_token'
-export const SESSION_META_STORAGE_KEY = 'mobula.session'
+export const TOKEN_STORAGE_KEY = 'bifrost.token'
+export const REFRESH_TOKEN_STORAGE_KEY = 'bifrost.refresh_token'
+export const SESSION_META_STORAGE_KEY = 'bifrost.session'
 
 /**
  * Dispatched on `window` when the API answers 401 to an authenticated

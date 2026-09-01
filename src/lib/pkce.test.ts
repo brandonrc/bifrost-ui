@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { PkceState } from './pkce'
 import {
+  PKCE_STORAGE_KEY,
   buildAuthorizeUrl,
   buildLogoutUrl,
   consumePkceState,
@@ -163,9 +164,9 @@ describe('PKCE state stash', () => {
   it('returns null for missing or malformed stored JSON', () => {
     const storage = fakeStorage()
     expect(loadPkceState(storage)).toBeNull()
-    storage.setItem('mobula.pkce', 'not json')
+    storage.setItem(PKCE_STORAGE_KEY, 'not json')
     expect(loadPkceState(storage)).toBeNull()
-    storage.setItem('mobula.pkce', JSON.stringify({ state: 1 }))
+    storage.setItem(PKCE_STORAGE_KEY, JSON.stringify({ state: 1 }))
     expect(loadPkceState(storage)).toBeNull()
   })
 
