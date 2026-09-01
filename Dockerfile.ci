@@ -7,7 +7,26 @@
 # Usage:
 #   npm ci && npm run build
 #   docker build -f Dockerfile.ci -t ghcr.io/brandonrc/bifrost-ui:latest .
-FROM nginx:1.27-alpine
+# nginx-unprivileged, matching ./Dockerfile — and this is the copy that
+# actually ships. build.yml builds THIS file on every push to main and pushes
+# ghcr.io/brandonrc/bifrost-ui:latest, which is what bifrost-pack's chart
+# deploys by default with pullPolicy: Always.
+#
+# Stock nginx cannot run under that chart: it starts as root and its entrypoint
+# chowns /var/cache/nginx, needing CAP_CHOWN, which the chart's
+# `capabilities: drop: ["ALL"]` removes —
+#
+#   nginx: [emerg] chown("/var/cache/nginx/client_temp", 101) failed
+#                  (1: Operation not permitted)
+#
+# The unprivileged variant runs as uid 101 with its cache dirs already owned,
+# so nothing chowns anything, and it listens on 8080 because an unprivileged
+# process cannot bind :80 without CAP_NET_BIND_SERVICE.
+#
+# nginx.conf is SHARED with ./Dockerfile and already says `listen 8080`, so
+# EXPOSE has to agree here too — a mismatch between the two is a silent 502
+# rather than a crash.
+FROM nginxinc/nginx-unprivileged@sha256:d9083fe47768377ef55dedafd67d4da7c2f2bc2bece7554954f29359deb0dce9
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY dist /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
