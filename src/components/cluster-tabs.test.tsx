@@ -17,7 +17,7 @@ import {
   formatRelativeAge,
 } from '@/components/cluster-tabs'
 import { EngineBadge } from '@/components/engine-badge'
-import { MobulaApiError } from '@/lib/api'
+import { BifrostApiError } from '@/lib/api'
 import type {
   ClusterEventsView,
   ClusterJobView,
@@ -171,7 +171,7 @@ describe('ClusterTabError', () => {
     const html = renderToStaticMarkup(
       <ClusterTabError
         error={
-          new MobulaApiError({
+          new BifrostApiError({
             kind: 'http',
             status: 503,
             message: 'bad gateway to cluster',

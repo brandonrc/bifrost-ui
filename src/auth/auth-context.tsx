@@ -32,7 +32,7 @@ import { clearSilentSsoAttempt } from '@/lib/silent-sso'
  * opaque local tokens use the login-time identity stored in the session
  * meta); with no usable access token but a stored refresh token, a silent
  * refresh is attempted before falling back to signed out; with no token at
- * all, the dev stub below mirrors `mobula serve --dev-allow-unauthenticated`
+ * all, the dev stub below mirrors `bifrost serve --dev-allow-unauthenticated`
  * when the feature flag is on. JWTs are decoded without signature
  * verification — the backend validates on every request.
  */

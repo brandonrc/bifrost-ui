@@ -7,15 +7,6 @@ from the generated OpenAPI client, never hand-written.
 
 The authoritative product/UX spec is [`docs/ui-ux-spec.md`](docs/ui-ux-spec.md).
 
-## TODO: swap the API client
-
-This app currently depends on a legacy generated client package
-(`@brandonrc/mobula-client`). Once `@brandonrc/bifrost-client@0.1.x` is
-published from the [bifrost-api](https://github.com/brandonrc/bifrost-api)
-pipeline, swap the import paths: `grep -rl "@brandonrc/mobula-client" src/`
-and replace with `@brandonrc/bifrost-client` in both `package.json` and
-`src/`.
-
 **Status: Milestone A (Foundation)** — app shell, design system, dev-mode auth,
 health indicator, and read-only screens against the Phase-2 backend. Cluster
 list and Registry render the typed table UI now and gracefully show
@@ -53,7 +44,7 @@ components in `src/components/ui`) · class-based dark mode.
 ## Prerequisites
 
 - Node.js 20+
-- The backend running locally: `mobula serve --dev-allow-unauthenticated`
+- The backend running locally: `bifrost serve --dev-allow-unauthenticated`
   (serves `http://127.0.0.1:8484`; the Vite dev server proxies `/api`,
   `/healthz`, and `/docs` to it)
 
@@ -74,13 +65,13 @@ npm run dev        # http://localhost:5173
 | `npm run lint`    | ESLint (flat config)                                                   |
 
 API types are not generated here — they come from the published
-`@brandonrc/mobula-client` package (see above).
+`@brandonrc/bifrost-client` package (see above).
 
 ## Auth (provider-driven: SSO redirect or local login)
 
 `/login` discovers its sign-in methods from `GET /api/v1/auth/providers`
 (api-v1.md §5.15, ADR-0011): a **local username/password form** when the
-backend runs `--local-auth` (opaque tokens — Mobula stores credentials,
+backend runs `--local-auth` (opaque tokens — Bifrost stores credentials,
 never signs them), **"Sign in with SSO"** when OIDC is configured, or both.
 The SSO path is Authorization Code + PKCE (S256) directly against the
 issuer — the standard SPA pattern, no client secret and no backend session
@@ -100,20 +91,20 @@ Two demo stacks exercise this (see the backend's `deploy/README.md`):
 - `./deploy/up.sh auth` — Keycloak at `http://localhost:8090` (realm
   `mobula`, public client `mobula`, users `admin`/`operator`/`developer`/
   `viewer`, password = username). The login page offers SSO.
-- The local-auth demo variant (`mobula serve --local-auth` with
-  `MOBULA_LOCAL_ADMIN_PASSWORD=admin`) — the login page renders the
+- The local-auth demo variant (`bifrost serve --local-auth` with
+  `BIFROST_LOCAL_ADMIN_PASSWORD=admin`) — the login page renders the
   username/password form (`admin`/`admin`).
 
 The SSO issuer falls back to `VITE_MOBULA_ISSUER` (default
 `http://localhost:8090/realms/mobula`) only on backends that predate
 `/api/v1/auth/providers`; when the backend reports an issuer it wins.
 Paste-a-JWT sign-in remains as a collapsed "advanced" option on `/login`
-for `mobula token`-minted service tokens (see the curl password-grant
+for `bifrost token`-minted service tokens (see the curl password-grant
 one-liner rendered there).
 
 With no token, a feature flag still controls the dev-auth stub that assumes
 a fake **Admin** identity, so the unauthenticated demo stack
-(`mobula serve --dev-allow-unauthenticated`) keeps working:
+(`bifrost serve --dev-allow-unauthenticated`) keeps working:
 
 - `VITE_MOBULA_DEV_AUTH=true|false` — defaults to **on** under `vite dev`,
   **off** in production builds.
@@ -131,7 +122,7 @@ src/
 │   ├── data-table.tsx         # TanStack Table renderer
 │   └── empty-state.tsx        # first-run / no-results / unreachable / denied variants
 ├── lib/
-│   ├── api.ts                 # Typed fetch wrapper + MobulaApiError (status, required/granted role)
+│   ├── api.ts                 # Typed fetch wrapper + BifrostApiError (status, required/granted role)
 │   ├── auth-token.ts          # JWT decode, groups→roles mapping, session precedence, token store
 │   ├── pkce.ts                # SSO redirect: PKCE S256, authorize/logout URLs, code exchange, refresh
 │   ├── providers.ts           # /auth/providers discovery, local-login errors, sign-out path selection
@@ -146,7 +137,7 @@ src/
 - **State-machine fidelity**: the UI never invents cluster states. All badge
   rendering goes through `src/lib/cluster-state.ts`, which maps 1:1 to the
   backend's 9-state `ClusterState`.
-- **Fail-closed errors**: API errors surface as `MobulaApiError` with
+- **Fail-closed errors**: API errors surface as `BifrostApiError` with
   `requiredRole`/`grantedRole` so 403s can render the denial (spec §1.4.6);
   404s from not-yet-implemented endpoints render a dedicated empty state.
 - **Secrets are write-only**: the registry table shows "token set / not set",

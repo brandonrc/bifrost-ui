@@ -1,5 +1,5 @@
 # CI image: packages a PRE-BUILT dist/ (produced on the host/runner with
-# `npm run build`, which needs NODE_AUTH_TOKEN for @brandonrc/mobula-client
+# `npm run build`, which needs NODE_AUTH_TOKEN for @brandonrc/bifrost-client
 # from GitHub Packages) into nginx. Keeping the npm build outside docker means
 # the image build needs no registry auth and no vendored client — contrast
 # with ./Dockerfile, the compose flow that vendors the client into the image.

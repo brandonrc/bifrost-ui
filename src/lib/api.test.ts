@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { MobulaApiError, clusterViewState, rolesFromErrorBody } from './api'
+import { BifrostApiError, clusterViewState, rolesFromErrorBody } from './api'
 import type { ClusterView } from './api'
 
 function view(overrides: Partial<ClusterView> = {}): ClusterView {
@@ -44,9 +44,9 @@ describe('rolesFromErrorBody', () => {
   })
 })
 
-describe('MobulaApiError', () => {
+describe('BifrostApiError', () => {
   it('classifies 404 as not-implemented (Phase 3 API not landed)', () => {
-    const err = new MobulaApiError({
+    const err = new BifrostApiError({
       kind: 'http',
       status: 404,
       message: 'not found',
@@ -57,7 +57,7 @@ describe('MobulaApiError', () => {
   })
 
   it('classifies 403 with role context as forbidden', () => {
-    const err = new MobulaApiError({
+    const err = new BifrostApiError({
       kind: 'http',
       status: 403,
       message: 'forbidden',
@@ -70,7 +70,7 @@ describe('MobulaApiError', () => {
   })
 
   it('classifies kind=network as unreachable', () => {
-    const err = new MobulaApiError({
+    const err = new BifrostApiError({
       kind: 'network',
       status: 0,
       message: 'connection refused',
@@ -81,15 +81,15 @@ describe('MobulaApiError', () => {
 
   it('treats 5xx as unavailable (dev proxy answers 500 when backend is down)', () => {
     expect(
-      new MobulaApiError({ kind: 'http', status: 500, message: 'proxy error' })
+      new BifrostApiError({ kind: 'http', status: 500, message: 'proxy error' })
         .isUnavailable,
     ).toBe(true)
     expect(
-      new MobulaApiError({ kind: 'http', status: 502, message: 'bad gateway' })
+      new BifrostApiError({ kind: 'http', status: 502, message: 'bad gateway' })
         .isUnavailable,
     ).toBe(true)
     expect(
-      new MobulaApiError({ kind: 'http', status: 404, message: 'not found' })
+      new BifrostApiError({ kind: 'http', status: 404, message: 'not found' })
         .isUnavailable,
     ).toBe(false)
   })

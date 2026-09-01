@@ -36,7 +36,7 @@ export function PoolNewPage() {
       queryClient.invalidateQueries({ queryKey: ['pools'] })
       navigate(`/pools/${state.name.trim()}`)
     },
-    // 400 invalid_spec / 409 conflict bodies surface verbatim (MobulaApiError
+    // 400 invalid_spec / 409 conflict bodies surface verbatim (BifrostApiError
     // already extracts the backend's message field).
     onError: (err) => {
       setErrors([err instanceof Error ? err.message : String(err)])

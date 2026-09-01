@@ -40,7 +40,7 @@ import {
 
 /**
  * Save-error idiom for both cards: the backend's 400 names the offending
- * key in plain text and surfaces verbatim (MobulaApiError.message).
+ * key in plain text and surfaces verbatim (BifrostApiError.message).
  */
 function mutationMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err)

@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { api, MobulaApiError } from '@/lib/api'
+import { api, BifrostApiError } from '@/lib/api'
 import type {
   ClusterEventsView,
   ClusterJobView,
@@ -298,7 +298,7 @@ export function ClusterTabError({
   error: unknown
   onRetry?: () => void
 }) {
-  if (error instanceof MobulaApiError && error.status === 503) {
+  if (error instanceof BifrostApiError && error.status === 503) {
     return (
       <EmptyState
         icon={CloudOff}

@@ -62,7 +62,7 @@ const columns: ColumnDef<RegistryCluster>[] = [
 
 /**
  * Registry admin (spec §5.6). Read-only until Phase 3 (D5) — edits stay in
- * clusters.toml + restart because the write API waits on the southbound
+ * clusters.json + restart because the write API waits on the southbound
  * SSRF hardening. The endpoint itself is greenfield, so until
  * GET /api/v1/registry/clusters exists this page shows the
  * not-implemented empty state.
@@ -86,8 +86,8 @@ export function RegistryPage() {
         <CardContent className="py-3 text-sm text-muted-foreground">
           The registry is <span className="text-foreground">read-only</span>{' '}
           until Phase 3 (decision D5). To change it, edit{' '}
-          <code className="text-foreground">clusters.toml</code> and restart{' '}
-          <code className="text-foreground">mobula serve</code>.
+          <code className="text-foreground">clusters.json</code> and restart{' '}
+          <code className="text-foreground">bifrost serve</code>.
         </CardContent>
       </Card>
 

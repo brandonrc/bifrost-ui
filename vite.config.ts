@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   server: {
-    // Dev loop per spec §7: vite dev proxies to `mobula serve`.
+    // Dev loop per spec §7: vite dev proxies to `bifrost serve`.
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8484',

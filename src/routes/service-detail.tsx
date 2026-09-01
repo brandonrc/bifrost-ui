@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { api, MobulaApiError } from '@/lib/api'
+import { api, BifrostApiError } from '@/lib/api'
 import { serviceViewState } from '@/lib/services'
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
@@ -67,7 +67,7 @@ export function ServiceDetailPage() {
     // services API is unmounted (no provisioner configured) — the router
     // fallback returns the same bare 404 for both.
     const unavailable =
-      query.error instanceof MobulaApiError && query.error.isNotImplemented
+      query.error instanceof BifrostApiError && query.error.isNotImplemented
     return (
       <>
         <PageHeader title={`Service ${name}`} />

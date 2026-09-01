@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { reduceControlPlaneHealth } from './health'
 
-const version = { name: 'mobula', version: '0.0.1' }
+const version = { name: 'bifrost', version: '0.0.1' }
 
 describe('reduceControlPlaneHealth', () => {
   it('is green when both probes succeed, carrying the version', () => {
@@ -13,7 +13,7 @@ describe('reduceControlPlaneHealth', () => {
     })
     expect(health.tone).toBe('green')
     expect(health.version).toBe('0.0.1')
-    expect(health.label).toContain('mobula')
+    expect(health.label).toContain('bifrost')
   })
 
   it('is amber when /healthz is ok but the version endpoint fails', () => {

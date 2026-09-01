@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { MobulaApiError } from './api'
+import { BifrostApiError } from './api'
 import {
   fallbackProviders,
   loginErrorMessage,
@@ -62,7 +62,7 @@ describe('loginErrorMessage', () => {
   it('maps the uniform 401 invalid_credentials to a neutral message', () => {
     // Unknown user / wrong password / locked are indistinguishable by
     // design (api-v1.md §5.15) — the message must not speculate.
-    const err = new MobulaApiError({
+    const err = new BifrostApiError({
       kind: 'http',
       status: 401,
       message: 'invalid_credentials',
@@ -71,14 +71,14 @@ describe('loginErrorMessage', () => {
   })
 
   it('maps an unreachable control plane distinctly', () => {
-    const err = new MobulaApiError({ kind: 'network', status: 0, message: 'down' })
+    const err = new BifrostApiError({ kind: 'network', status: 0, message: 'down' })
     expect(loginErrorMessage(err)).toBe('Cannot reach the Bifrost control plane.')
   })
 
   it('falls back to a generic message for other failures', () => {
     expect(
       loginErrorMessage(
-        new MobulaApiError({ kind: 'http', status: 500, message: 'boom' }),
+        new BifrostApiError({ kind: 'http', status: 500, message: 'boom' }),
       ),
     ).toBe('Sign-in failed. Try again.')
     expect(loginErrorMessage(new Error('weird'))).toBe('Sign-in failed. Try again.')

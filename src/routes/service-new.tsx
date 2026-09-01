@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils'
 /**
  * Deploy-service form, backed by the implemented `POST /api/v1/services`.
  * Mirrors `ServiceSpec` exactly; `serve_config_v2` is a verbatim YAML
- * passthrough (Mobula never interprets it), so a monospace textarea is the
+ * passthrough (Bifrost never interprets it), so a monospace textarea is the
  * right editor for v0. POST returns 202 — KubeRay's RayService controller
  * owns the rollout from there.
  *
@@ -44,7 +44,7 @@ export function ServiceNewPage() {
       navigate(`/services/${state.name.trim()}`)
     },
     // Backend error bodies (400 invalid spec, 502 service backend error)
-    // surface verbatim — MobulaApiError carries the plain-text message.
+    // surface verbatim — BifrostApiError carries the plain-text message.
     onError: (err) => {
       setErrors([err instanceof Error ? err.message : String(err)])
     },

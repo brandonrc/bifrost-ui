@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { api, MobulaApiError } from '@/lib/api'
+import { api, BifrostApiError } from '@/lib/api'
 import type { ServiceView } from '@/lib/api'
 import { serviceViewState } from '@/lib/services'
 
@@ -44,7 +44,7 @@ export function ServicesUnavailableState({ onRetry }: { onRetry?: () => void }) 
 
 /**
  * Ray Serve service list, backed by the implemented `GET /api/v1/services`
- * (a thin proxy over KubeRay RayService — there is no Mobula store here).
+ * (a thin proxy over KubeRay RayService — there is no Bifrost store here).
  * `ServiceView` is name/state/url only: project, ray_version, and the
  * upgrade strategy are spec fields the view does not echo, so the table
  * shows what the wire actually carries. The deploy affordance is gated on
@@ -76,7 +76,7 @@ export function ServicesPage() {
       {query.isPending ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : query.isError ? (
-        query.error instanceof MobulaApiError &&
+        query.error instanceof BifrostApiError &&
         query.error.isNotImplemented ? (
           <ServicesUnavailableState onRetry={() => query.refetch()} />
         ) : (

@@ -1,8 +1,9 @@
 /**
- * Typed API client for the Mobula control plane.
+ * Typed API client for the Bifrost control plane.
  *
- * API types come from `@brandonrc/mobula-client` — generated from mobula's
- * `openapi.json` (the source of truth) and published to GitHub Packages.
+ * API types come from `@brandonrc/bifrost-client` — generated from the
+ * frozen Bifrost `openapi.json` (the source of truth, vendored from
+ * bifrost-api) and published to GitHub Packages.
  * We never hand-write shapes the backend owns; re-exports below keep call
  * sites importing from `./api` while the truth lives in the package.
  *
@@ -26,7 +27,7 @@ import {
   ServicesApi,
   SystemApi,
   UsageApi,
-} from '@brandonrc/mobula-client'
+} from '@brandonrc/bifrost-client'
 import type {
   AllocationSpec,
   ClusterSpec as GeneratedClusterSpec,
@@ -47,7 +48,7 @@ import type {
   UsageReport,
   VersionInfo,
   WorkerGroup,
-} from '@brandonrc/mobula-client'
+} from '@brandonrc/bifrost-client'
 
 import type { AuditListResponse } from './audit'
 import { getCurrentToken, notifySessionExpired } from './auth-token'
@@ -80,7 +81,7 @@ export type { Engine } from './engine'
 /**
  * `engine` is UI-ahead: the running control plane (multi-engine build) returns
  * it per cluster and accepts it on create, but it is not in the published
- * `@brandonrc/mobula-client` yet — the generated `ClusterViewFromJSON` /
+ * `@brandonrc/bifrost-client` yet — the generated `ClusterViewFromJSON` /
  * `ClusterSpecToJSON` silently drop it. So we extend the generated shapes here
  * and thread `engine` through the hand-mapped cluster reads/writes below.
  * Delete these extensions once the client is republished with `engine`.
@@ -93,7 +94,7 @@ export interface CreateCluster {
   spec: ClusterSpec
 }
 
-// Mobula's four roles (mobula-auth). Kept in sync with the backend enum;
+// Bifrost's four roles (mobula-auth). Kept in sync with the backend enum;
 // `operator` was previously missing here — the kind of drift the generated
 // client exists to prevent.
 export type Role = 'viewer' | 'developer' | 'operator' | 'admin'
@@ -101,7 +102,7 @@ export type Role = 'viewer' | 'developer' | 'operator' | 'admin'
 /**
  * `GET /api/v1/identity` exists backend-side now (access.rs: "who am I" for
  * any authenticated caller, plus the dev identity when auth is disabled) but
- * is not yet in the published `@brandonrc/mobula-client` — hand-written here
+ * is not yet in the published `@brandonrc/bifrost-client` — hand-written here
  * until it is. Note `roles` is a list (a caller can hold several) — matching
  * the backend's `Vec<Role>`.
  */
@@ -199,7 +200,7 @@ export interface RegistryCluster {
 /**
  * UI-ahead: per-cluster observability (`GET /api/v1/clusters/{id}/nodes` and
  * `.../jobs`, mobula PR #91) landed backend-side but is not yet in the
- * published `@brandonrc/mobula-client` — hand-fetched like identity/audit
+ * published `@brandonrc/bifrost-client` — hand-fetched like identity/audit
  * below; migrate to the generated `ClustersApi` once the client is
  * republished. Both proxy the cluster's live Ray state, so a reachable
  * control plane fronting an unreachable cluster answers 503 (`isUnavailable`);
@@ -317,7 +318,7 @@ export interface ClusterLogsView {
 
 /**
  * UI-ahead: local-auth endpoints (api-v1.md §5.15, ADR-0011) are not yet in
- * the published `@brandonrc/mobula-client` — hand-written here like
+ * the published `@brandonrc/bifrost-client` — hand-written here like
  * `Identity`/`RegistryCluster`; delete and import from the client once
  * published. `identity.roles` comes from the local user's role column.
  */
@@ -355,7 +356,7 @@ function toClusterView(json: unknown): ClusterView {
   }
 }
 
-export interface MobulaApiErrorInit {
+export interface BifrostApiErrorInit {
   kind: 'http' | 'network'
   status: number
   message: string
@@ -368,15 +369,15 @@ export interface MobulaApiErrorInit {
  * 403s render the required vs granted role, network failures render the
  * backend-unreachable empty state, 404s render "not implemented yet".
  */
-export class MobulaApiError extends Error {
+export class BifrostApiError extends Error {
   readonly kind: 'http' | 'network'
   readonly status: number
   readonly requiredRole?: Role
   readonly grantedRole?: Role
 
-  constructor(init: MobulaApiErrorInit) {
+  constructor(init: BifrostApiErrorInit) {
     super(init.message)
-    this.name = 'MobulaApiError'
+    this.name = 'BifrostApiError'
     this.kind = init.kind
     this.status = init.status
     this.requiredRole = init.requiredRole
@@ -388,7 +389,7 @@ export class MobulaApiError extends Error {
     return this.kind === 'http' && this.status === 404
   }
 
-  /** `mobula serve` is down or unreachable. */
+  /** `bifrost serve` is down or unreachable. */
   get isUnreachable(): boolean {
     return this.kind === 'network'
   }
@@ -396,7 +397,7 @@ export class MobulaApiError extends Error {
   /**
    * Network failure, or a 5xx from the control plane / dev proxy (spec §6:
    * "502 from gateway = cluster unreachable"). In dev, the Vite proxy
-   * answers 500 when `mobula serve` isn't running.
+   * answers 500 when `bifrost serve` isn't running.
    */
   get isUnavailable(): boolean {
     return (
@@ -471,7 +472,7 @@ function messageFromErrorBody(body: unknown): string | undefined {
  * and pool creates). Read the body once as text, try JSON first, then fall
  * back to the raw string so those messages surface verbatim in forms.
  */
-async function errorFromResponse(res: Response): Promise<MobulaApiError> {
+async function errorFromResponse(res: Response): Promise<BifrostApiError> {
   // A 401 while holding a token means it expired or was revoked — clear
   // the session so the UI routes to sign-in instead of retrying a dead
   // bearer. Anonymous 401s leave the session alone (there is none).
@@ -484,7 +485,7 @@ async function errorFromResponse(res: Response): Promise<MobulaApiError> {
     body = undefined
   }
   const trimmed = text.trim()
-  return new MobulaApiError({
+  return new BifrostApiError({
     kind: 'http',
     status: res.status,
     message:
@@ -509,11 +510,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { Accept: 'application/json', ...authHeaders(), ...init?.headers },
     })
   } catch {
-    throw new MobulaApiError({
+    throw new BifrostApiError({
       kind: 'network',
       status: 0,
       message:
-        'Cannot reach the Bifrost control plane. Start it with `mobula serve --dev-allow-unauthenticated`.',
+        'Cannot reach the Bifrost control plane. Start it with `bifrost serve --dev-allow-unauthenticated`.',
     })
   }
 
@@ -532,11 +533,11 @@ async function requestText(path: string, init?: RequestInit): Promise<string> {
       headers: { ...authHeaders(), ...init?.headers },
     })
   } catch {
-    throw new MobulaApiError({
+    throw new BifrostApiError({
       kind: 'network',
       status: 0,
       message:
-        'Cannot reach the Bifrost control plane. Start it with `mobula serve --dev-allow-unauthenticated`.',
+        'Cannot reach the Bifrost control plane. Start it with `bifrost serve --dev-allow-unauthenticated`.',
     })
   }
 
@@ -545,30 +546,30 @@ async function requestText(path: string, init?: RequestInit): Promise<string> {
 }
 
 /**
- * Turn a thrown value from the generated client into a `MobulaApiError`.
+ * Turn a thrown value from the generated client into a `BifrostApiError`.
  * The client throws `ResponseError` (carrying the raw `Response`) on a
  * non-2xx status and `FetchError` when the network call itself fails; both
  * become the fail-closed shape the UI already knows how to render.
  */
-async function toMobulaError(err: unknown): Promise<MobulaApiError> {
-  if (err instanceof MobulaApiError) return err
+async function toBifrostError(err: unknown): Promise<BifrostApiError> {
+  if (err instanceof BifrostApiError) return err
   if (err instanceof ResponseError) return errorFromResponse(err.response)
   // A client-wrapped `FetchError` (network reject) or anything unexpected:
   // the control plane is unreachable.
-  return new MobulaApiError({
+  return new BifrostApiError({
     kind: 'network',
     status: 0,
     message:
-      'Cannot reach the Mobula control plane. Start it with `mobula serve --dev-allow-unauthenticated`.',
+      'Cannot reach the Bifrost control plane. Start it with `bifrost serve --dev-allow-unauthenticated`.',
   })
 }
 
-/** Run a generated-client call, normalizing any failure to `MobulaApiError`. */
+/** Run a generated-client call, normalizing any failure to `BifrostApiError`. */
 async function call<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn()
   } catch (err) {
-    throw await toMobulaError(err)
+    throw await toBifrostError(err)
   }
 }
 
@@ -685,7 +686,7 @@ export const api = {
   registryClusters: () => request<RegistryCluster[]>('/api/v1/registry/clusters'),
   /**
    * UI-ahead: `GET /api/v1/audit` landed backend-side (api-v1.md §5.9,
-   * 2026-08-16) but is not yet in the published `@brandonrc/mobula-client`
+   * 2026-08-16) but is not yet in the published `@brandonrc/bifrost-client`
    * — hand-fetched like identity/registry above, with the query string
    * built by `buildAuditQuery` in `./audit`. Migrate to the generated
    * AuditApi once the client is republished. 404 on older backends → the
@@ -700,7 +701,7 @@ export const api = {
     }),
   /**
    * UI-ahead: local auth (api-v1.md §5.15, ADR-0011) is not yet in the
-   * published `@brandonrc/mobula-client` — hand-fetched like identity/audit
+   * published `@brandonrc/bifrost-client` — hand-fetched like identity/audit
    * above; migrate to the generated client once published. `providers` is
    * public and always mounted on auth-enabled backends (404 on older ones
    * → the login page falls back to env-based discovery). `login` is public;

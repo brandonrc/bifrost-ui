@@ -475,9 +475,9 @@ export function AccessPage() {
         <CardContent className="text-sm text-muted-foreground">
           <p>
             Non-human callers authenticate with OIDC client-credentials
-            tokens (<code className="text-foreground">mobula token …</code>)
+            tokens (<code className="text-foreground">bifrost token …</code>)
             or per-user personal access tokens (
-            <code className="text-foreground">mobula login</code> /{' '}
+            <code className="text-foreground">bifrost login</code> /{' '}
             <code className="text-foreground">POST /api/v1/auth/tokens</code>
             ). PAT management stays in the CLI for v1 (api-v1.md §5.15).
           </p>

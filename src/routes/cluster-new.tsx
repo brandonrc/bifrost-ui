@@ -46,7 +46,7 @@ export function ClusterNewPage() {
       navigate(`/clusters/${state.id.trim()}`)
     },
     // 400 invalid_spec / 409 quota_exceeded bodies surface verbatim
-    // (MobulaApiError carries the backend's plain-text message).
+    // (BifrostApiError carries the backend's plain-text message).
     onError: (err) => {
       setErrors([err instanceof Error ? err.message : String(err)])
     },

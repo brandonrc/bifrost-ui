@@ -44,6 +44,7 @@ describe('sumResourceHours', () => {
     from: 0,
     to: 86_400,
     groups,
+    budgets: [],
   })
 
   it('sums per-project rows and ignores the overlapping pool-total row', () => {

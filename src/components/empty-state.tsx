@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 
 import { Button } from '@/components/ui/button'
-import { MobulaApiError } from '@/lib/api'
+import { BifrostApiError } from '@/lib/api'
 import { startSsoSignIn } from '@/lib/pkce'
 
 /**
@@ -58,7 +58,7 @@ export function ApiErrorState({
     </Button>
   ) : undefined
 
-  if (error instanceof MobulaApiError) {
+  if (error instanceof BifrostApiError) {
     if (error.isUnauthorized) {
       return (
         <EmptyState
@@ -127,7 +127,7 @@ export function ApiErrorState({
             <>
               Start the backend with{' '}
               <code className="text-foreground">
-                mobula serve --dev-allow-unauthenticated
+                bifrost serve --dev-allow-unauthenticated
               </code>{' '}
               and keep <code className="text-foreground">vite dev</code>{' '}
               running — it proxies to http://127.0.0.1:8484.

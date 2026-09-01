@@ -1,7 +1,7 @@
 name: Build
 
 # Build the dashboard and publish ghcr.io/<owner>/bifrost-ui. The SPA is built
-# on the runner (npm needs GitHub Packages auth for @brandonrc/mobula-client),
+# on the runner (npm needs GitHub Packages auth for @brandonrc/bifrost-client),
 # then packaged into nginx via Dockerfile.ci — the docker build itself needs
 # no registry auth. Single-arch amd64.
 on:
@@ -29,16 +29,16 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # @brandonrc/mobula-client is pulled from GitHub Packages (see
+        # @brandonrc/bifrost-client is pulled from GitHub Packages (see
         # .npmrc). GITHUB_TOKEN usually cannot read a package published from
-        # a DIFFERENT repo (mobula-api) unless this repo has been granted
+        # a DIFFERENT repo (bifrost-api) unless this repo has been granted
         # access on the package's settings page. If `npm ci` fails with
         # 401/403 from npm.pkg.github.com, either grant this repo access at
-        # https://github.com/users/brandonrc/packages/npm/mobula-client/settings
+        # https://github.com/users/brandonrc/packages/npm/bifrost-client/settings
         # or create a classic PAT with read:packages and save it as the
-        # MOBULA_CLIENT_READ_TOKEN secret — it takes precedence automatically.
+        # BIFROST_CLIENT_READ_TOKEN secret — it takes precedence automatically.
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.MOBULA_CLIENT_READ_TOKEN || secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.BIFROST_CLIENT_READ_TOKEN || secrets.GITHUB_TOKEN }}
         run: npm ci
 
       - name: Build SPA

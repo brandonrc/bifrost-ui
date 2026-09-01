@@ -1,4 +1,4 @@
-import { MobulaApiError } from './api'
+import { BifrostApiError } from './api'
 import type { SessionSource } from './auth-token'
 
 /**
@@ -53,7 +53,7 @@ export function fallbackProviders(envIssuer: string | undefined): AuthProviders 
  * and never speculates about which field failed (api-v1.md §5.15).
  */
 export function loginErrorMessage(err: unknown): string {
-  if (err instanceof MobulaApiError) {
+  if (err instanceof BifrostApiError) {
     if (err.status === 401) return 'Invalid username or password.'
     if (err.isUnreachable) {
       return 'Cannot reach the Bifrost control plane.'

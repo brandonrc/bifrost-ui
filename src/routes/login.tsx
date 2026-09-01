@@ -20,7 +20,7 @@ import { fallbackProviders, loginErrorMessage, parseProviders } from '@/lib/prov
  * configured (the backend-reported issuer overrides the VITE default), or
  * both. Backends that predate the endpoint (404) fall back to
  * VITE_MOBULA_ISSUER-based SSO. Paste-a-token stays as a collapsed
- * advanced option for `mobula token`-minted service tokens.
+ * advanced option for `bifrost token`-minted service tokens.
  */
 export function LoginPage() {
   const { identity, signIn, signInLocal } = useAuth()
@@ -219,7 +219,7 @@ export function LoginPage() {
               For scripts and service accounts, paste a token above instead of
               signing in interactively.{' '}
               <span className="font-medium text-foreground">CLI:</span> run{' '}
-              <code className="text-foreground">mobula login</code> (device
+              <code className="text-foreground">bifrost login</code> (device
               flow) and paste the issued access token.
             </p>
             <p>

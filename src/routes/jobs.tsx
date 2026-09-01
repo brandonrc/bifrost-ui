@@ -134,7 +134,7 @@ export function JobsPage() {
   --working-dir . -- python train.py
 
 # Your JWT travels via:
-export RAY_JOB_HEADERS='{"Authorization": "Bearer '"$(mobula token)"'"}'`}
+export RAY_JOB_HEADERS='{"Authorization": "Bearer '"$(bifrost token)"'"}'`}
             </pre>
           </CardContent>
         </Card>
