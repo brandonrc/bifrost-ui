@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { api, primaryRole, type Role } from '@/lib/api'
 import { getSessionMeta, issuerBase, type SessionSource } from '@/lib/auth-token'
-import { SSO_CLIENT_ID, buildLogoutUrl } from '@/lib/pkce'
+import { buildLogoutUrl, ssoClientId } from '@/lib/pkce'
 import { planSignOut } from '@/lib/providers'
 
 const ROLE_VARIANT: Record<Role, 'default' | 'secondary' | 'outline'> = {
@@ -57,7 +57,7 @@ export function IdentityChip() {
         window.location.assign(
           buildLogoutUrl({
             issuer: getSessionMeta()?.issuer ?? issuerBase(),
-            clientId: SSO_CLIENT_ID,
+            clientId: ssoClientId(),
             postLogoutRedirectUri: `${window.location.origin}/`,
           }),
         )

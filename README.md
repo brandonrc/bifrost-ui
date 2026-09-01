@@ -102,6 +102,21 @@ Paste-a-JWT sign-in remains as a collapsed "advanced" option on `/login`
 for `bifrost token`-minted service tokens (see the curl password-grant
 one-liner rendered there).
 
+The OIDC **client id** is set with `VITE_BIFROST_SSO_CLIENT_ID`, defaulting to
+the local demo realm's client when unset. This has to be settable because the
+id is chosen by whoever provisions the Keycloak client, not by this repo:
+Nebari's operator derives a deterministic `<namespace>-<nebariapp-name>` (e.g.
+`bifrost-bifrost-ui-spa`), which no literal in our bundle could match. A
+standalone build that sets nothing behaves exactly as before.
+
+> Setting the client id is necessary but not sufficient for a gateway-fronted
+> deployment. Separate NebariApps for the API and the UI mean separate client
+> ids, so a token minted for this client carries an `aud` that Bifrost's
+> validator rejects until either a Keycloak audience mapper adds Bifrost's
+> audience or Bifrost is configured with an explicit `auth.oidc.audience`. The
+> client id and the audience are independent values — do not derive one from
+> the other.
+
 With no token, a feature flag still controls the dev-auth stub that assumes
 a fake **Admin** identity, so the unauthenticated demo stack
 (`bifrost serve --dev-allow-unauthenticated`) keeps working:

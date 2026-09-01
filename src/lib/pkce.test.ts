@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { PkceState } from './pkce'
 import {
   PKCE_STORAGE_KEY,
+  DEFAULT_SSO_CLIENT_ID,
   buildAuthorizeUrl,
   buildLogoutUrl,
   consumePkceState,
@@ -12,6 +13,7 @@ import {
   loadPkceState,
   refreshTokens,
   s256Challenge,
+  ssoClientId,
   storePkceState,
 } from './pkce'
 
@@ -251,5 +253,48 @@ describe('token endpoint calls', () => {
     await refreshTokens('rt', 'https://idp.example.com/realms/prod')
     const [url] = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
     expect(url).toBe('https://idp.example.com/realms/prod/protocol/openid-connect/token')
+  })
+})
+
+describe('ssoClientId (per-deployment OIDC client)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('falls back to the demo realm client when nothing is injected', () => {
+    expect(ssoClientId()).toBe(DEFAULT_SSO_CLIENT_ID)
+  })
+
+  it('uses an operator-provisioned client id when one is injected', () => {
+    // Nebari's operator derives <namespace>-<nebariapp-name>; the point of the
+    // override is that we cannot know this string at build time.
+    vi.stubEnv('VITE_BIFROST_SSO_CLIENT_ID', 'bifrost-bifrost-ui-spa')
+    expect(ssoClientId()).toBe('bifrost-bifrost-ui-spa')
+  })
+
+  it('ignores an empty value rather than authenticating as the empty client', () => {
+    vi.stubEnv('VITE_BIFROST_SSO_CLIENT_ID', '')
+    expect(ssoClientId()).toBe(DEFAULT_SSO_CLIENT_ID)
+  })
+
+  it('reaches the authorize URL, which is the reason it is overridable', () => {
+    vi.stubEnv('VITE_BIFROST_SSO_CLIENT_ID', 'bifrost-bifrost-ui-spa')
+    const url = new URL(
+      buildAuthorizeUrl({
+        issuer: ISSUER,
+        clientId: ssoClientId(),
+        redirectUri: 'http://localhost:5173/auth/callback',
+        state: 'st',
+        codeChallenge: 'ch',
+      }),
+    )
+    expect(url.searchParams.get('client_id')).toBe('bifrost-bifrost-ui-spa')
+  })
+
+  it('is read per call, not frozen at module load', () => {
+    vi.stubEnv('VITE_BIFROST_SSO_CLIENT_ID', 'first-client')
+    expect(ssoClientId()).toBe('first-client')
+    vi.stubEnv('VITE_BIFROST_SSO_CLIENT_ID', 'second-client')
+    expect(ssoClientId()).toBe('second-client')
   })
 })
