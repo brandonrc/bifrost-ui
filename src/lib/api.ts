@@ -94,7 +94,7 @@ export interface CreateCluster {
   spec: ClusterSpec
 }
 
-// Bifrost's four roles (mobula-auth). Kept in sync with the backend enum;
+// Bifrost's four roles (the backend auth package). Kept in sync with the backend enum;
 // `operator` was previously missing here — the kind of drift the generated
 // client exists to prevent.
 export type Role = 'viewer' | 'developer' | 'operator' | 'admin'
@@ -199,7 +199,7 @@ export interface RegistryCluster {
 
 /**
  * UI-ahead: per-cluster observability (`GET /api/v1/clusters/{id}/nodes` and
- * `.../jobs`, mobula PR #91) landed backend-side but is not yet in the
+ * `.../jobs`, the backend) landed backend-side but is not yet in the
  * published `@brandonrc/bifrost-client` — hand-fetched like identity/audit
  * below; migrate to the generated `ClustersApi` once the client is
  * republished. Both proxy the cluster's live Ray state, so a reachable
@@ -254,7 +254,7 @@ export interface ClusterJobView {
 }
 
 /**
- * UI-ahead: per-cluster events/metrics/logs (mobula PR #93) — the
+ * UI-ahead: per-cluster events/metrics/logs (the backend) — the
  * metrics/events/logs siblings of nodes/jobs above, hand-fetched until the
  * generated client is republished. Same failure semantics: 503 → cluster/
  * source unreachable (`isUnavailable`); 404 → unknown cluster or a backend
@@ -623,7 +623,7 @@ export const api = {
   },
   deleteCluster: (id: string) => call(() => clustersApi.deleteCluster({ id })),
   /**
-   * UI-ahead: per-cluster nodes/jobs (mobula PR #91) are not in the published
+   * UI-ahead: per-cluster nodes/jobs (the backend) are not in the published
    * client yet — hand-fetched like identity/audit below (see the `NodeView` /
    * `ClusterJobView` notes above). 503 → cluster unreachable; 404 → the
    * running backend predates the endpoint.

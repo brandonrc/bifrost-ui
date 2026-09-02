@@ -1,6 +1,6 @@
 /**
  * The single source of truth for rendering `ClusterState`
- * (mobula-core `cluster.rs`, spec §1.4.1 and §6). The UI never invents
+ * (backend core cluster state machine, spec §1.4.1 and §6). The UI never invents
  * states — every badge maps 1:1 to one of these nine.
  */
 export const CLUSTER_STATES = [

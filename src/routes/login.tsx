@@ -12,6 +12,7 @@ import { api } from '@/lib/api'
 import { issuerBase } from '@/lib/auth-token'
 import { ssoClientId, startSsoSignIn } from '@/lib/pkce'
 import { fallbackProviders, loginErrorMessage, parseProviders } from '@/lib/providers'
+import { runtimeConfig } from '@/lib/runtime-config'
 
 /**
  * Provider-driven sign-in (api-v1.md §5.15): `GET /api/v1/auth/providers`
@@ -35,7 +36,7 @@ export function LoginPage() {
   const providers = providersQuery.isPending
     ? null
     : (providersQuery.isSuccess ? parseProviders(providersQuery.data) : null) ??
-      fallbackProviders(import.meta.env.VITE_BIFROST_ISSUER)
+      fallbackProviders(runtimeConfig().issuer ?? import.meta.env.VITE_BIFROST_ISSUER)
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')

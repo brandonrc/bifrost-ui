@@ -1,3 +1,4 @@
+import { runtimeConfig } from './runtime-config'
 import type { Identity, Role } from './api'
 
 /**
@@ -28,7 +29,7 @@ export const SESSION_EXPIRED_EVENT = 'bifrost:session-expired'
 export const DEFAULT_ISSUER = 'http://localhost:8090/realms/bifrost'
 
 export function issuerBase(): string {
-  return import.meta.env.VITE_BIFROST_ISSUER || DEFAULT_ISSUER
+  return runtimeConfig().issuer || import.meta.env.VITE_BIFROST_ISSUER || DEFAULT_ISSUER
 }
 
 /**
@@ -56,7 +57,7 @@ const GROUP_ROLE_MAP: Record<string, Role> = {
 /** Display order, most privileged first (purely cosmetic). */
 const ROLE_ORDER: readonly Role[] = ['admin', 'operator', 'developer', 'viewer']
 
-/** Map IdP group paths to Mobula roles; unknown groups are ignored. */
+/** Map IdP group paths to Bifrost roles; unknown groups are ignored. */
 export function rolesFromGroups(groups: readonly string[]): Role[] {
   const held = new Set<Role>()
   for (const group of groups) {
