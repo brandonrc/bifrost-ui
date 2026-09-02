@@ -20,9 +20,9 @@ describe('parseProviders', () => {
     expect(
       parseProviders({
         local: false,
-        oidc: { issuer: 'http://localhost:8090/realms/mobula' },
+        oidc: { issuer: 'http://localhost:8090/realms/bifrost' },
       }),
-    ).toEqual({ local: false, oidc: { issuer: 'http://localhost:8090/realms/mobula' } })
+    ).toEqual({ local: false, oidc: { issuer: 'http://localhost:8090/realms/bifrost' } })
   })
 
   it('parses both methods at once', () => {

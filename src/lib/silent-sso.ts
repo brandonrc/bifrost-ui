@@ -9,7 +9,7 @@ import type { AuthProviders } from './providers'
  * "Sign in with SSO". Without an IdP session, Keycloak answers
  * `error=login_required` and the callback lands on /login quietly.
  *
- * The attempt is guarded by a sessionStorage flag (`mobula.sso.silent-attempted`)
+ * The attempt is guarded by a sessionStorage flag (`bifrost.sso.silent-attempted`)
  * so a failed attempt never loops: it is set when an attempt starts, kept on
  * a `login_required`-style denial, and cleared only on a successful sign-in
  * or an explicit sign-out. Explicit "Sign in with SSO" clicks are untouched

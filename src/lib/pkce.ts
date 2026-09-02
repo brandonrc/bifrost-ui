@@ -18,7 +18,7 @@ import { issuerBase } from './auth-token'
  * Public client id configured on the issuer, when nothing overrides it — the
  * local Keycloak demo realm's client.
  */
-export const DEFAULT_SSO_CLIENT_ID = 'mobula'
+export const DEFAULT_SSO_CLIENT_ID = 'bifrost'
 
 /**
  * The OIDC public client id to authenticate as.

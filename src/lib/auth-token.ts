@@ -25,7 +25,7 @@ export const SESSION_META_STORAGE_KEY = 'bifrost.session'
 export const SESSION_EXPIRED_EVENT = 'bifrost:session-expired'
 
 /** Default local Keycloak issuer; override with VITE_BIFROST_ISSUER. */
-export const DEFAULT_ISSUER = 'http://localhost:8090/realms/mobula'
+export const DEFAULT_ISSUER = 'http://localhost:8090/realms/bifrost'
 
 export function issuerBase(): string {
   return import.meta.env.VITE_BIFROST_ISSUER || DEFAULT_ISSUER
