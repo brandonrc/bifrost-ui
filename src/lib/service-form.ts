@@ -66,7 +66,7 @@ export function validateServiceForm(state: ServiceFormState): string[] {
   if (!/^\d+$/.test(state.workerReplicas.trim())) {
     errors.push('Worker replicas must be a non-negative whole number.')
   }
-  // Mobula does not interpret serveConfigV2 (verbatim passthrough), but an
+  // Bifrost does not interpret serveConfigV2 (verbatim passthrough), but an
   // empty config would deploy a service that serves nothing.
   if (state.serveConfigV2.trim() === '') {
     errors.push('Serve config (serve_config_v2 YAML) is required.')

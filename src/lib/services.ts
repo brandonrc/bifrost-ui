@@ -3,7 +3,7 @@ import { isClusterState, type ClusterState } from './cluster-state'
 
 /**
  * Service deploy/update/delete need `Write` on `Target::Service` — Developer
- * or Admin (mobula-auth `Role::grants`: deploying a Serve app is "code",
+ * or Admin (the backend Role::grants: deploying a Serve app is "code",
  * unlike cluster lifecycle which is Operator/Admin). Reads are Viewer+ and
  * never gated. Fails closed on null identity.
  */

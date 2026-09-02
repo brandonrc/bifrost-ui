@@ -186,7 +186,7 @@ describe('resolveSession precedence', () => {
   it('an SSO token (meta kind sso) reports the sso source', () => {
     const session = resolveSession({
       token: viewerToken,
-      meta: { kind: 'sso', issuer: 'http://localhost:8090/realms/mobula' },
+      meta: { kind: 'sso', issuer: 'http://localhost:8090/realms/bifrost' },
       now: NOW,
     })
     expect(session.source).toBe('sso')

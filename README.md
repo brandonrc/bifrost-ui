@@ -89,14 +89,14 @@ required" state with an SSO button.
 Two demo stacks exercise this (see the backend's `deploy/README.md`):
 
 - `./deploy/up.sh auth` — Keycloak at `http://localhost:8090` (realm
-  `mobula`, public client `mobula`, users `admin`/`operator`/`developer`/
+  `bifrost`, public client `bifrost`, users `admin`/`operator`/`developer`/
   `viewer`, password = username). The login page offers SSO.
 - The local-auth demo variant (`bifrost serve --local-auth` with
   `BIFROST_LOCAL_ADMIN_PASSWORD=admin`) — the login page renders the
   username/password form (`admin`/`admin`).
 
 The SSO issuer falls back to `VITE_BIFROST_ISSUER` (default
-`http://localhost:8090/realms/mobula`) only on backends that predate
+`http://localhost:8090/realms/bifrost`) only on backends that predate
 `/api/v1/auth/providers`; when the backend reports an issuer it wins.
 Paste-a-JWT sign-in remains as a collapsed "advanced" option on `/login`
 for `bifrost token`-minted service tokens (see the curl password-grant

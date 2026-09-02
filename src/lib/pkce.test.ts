@@ -17,7 +17,7 @@ import {
   storePkceState,
 } from './pkce'
 
-const ISSUER = 'http://localhost:8090/realms/mobula'
+const ISSUER = 'http://localhost:8090/realms/bifrost'
 
 function fakeStorage(): Storage {
   const map = new Map<string, string>()
@@ -75,7 +75,7 @@ describe('buildAuthorizeUrl', () => {
     const url = new URL(
       buildAuthorizeUrl({
         issuer: ISSUER,
-        clientId: 'mobula',
+        clientId: 'bifrost',
         redirectUri: 'http://localhost:5173/auth/callback',
         state: 'st',
         codeChallenge: 'ch',
@@ -85,7 +85,7 @@ describe('buildAuthorizeUrl', () => {
       `${ISSUER}/protocol/openid-connect/auth`,
     )
     expect(url.searchParams.get('response_type')).toBe('code')
-    expect(url.searchParams.get('client_id')).toBe('mobula')
+    expect(url.searchParams.get('client_id')).toBe('bifrost')
     expect(url.searchParams.get('redirect_uri')).toBe(
       'http://localhost:5173/auth/callback',
     )
@@ -99,7 +99,7 @@ describe('buildAuthorizeUrl', () => {
     const url = new URL(
       buildAuthorizeUrl({
         issuer: ISSUER,
-        clientId: 'mobula',
+        clientId: 'bifrost',
         redirectUri: 'http://localhost:5173/auth/callback',
         state: 'st',
         codeChallenge: 'ch',
@@ -112,7 +112,7 @@ describe('buildAuthorizeUrl', () => {
     const url = new URL(
       buildAuthorizeUrl({
         issuer: ISSUER,
-        clientId: 'mobula',
+        clientId: 'bifrost',
         redirectUri: 'http://localhost:5173/auth/callback',
         state: 'st',
         codeChallenge: 'ch',
@@ -128,7 +128,7 @@ describe('buildAuthorizeUrl', () => {
   it('tolerates a trailing slash on the issuer', () => {
     const url = buildAuthorizeUrl({
       issuer: `${ISSUER}/`,
-      clientId: 'mobula',
+      clientId: 'bifrost',
       redirectUri: 'http://localhost:8088/auth/callback',
       state: 'st',
       codeChallenge: 'ch',
@@ -142,7 +142,7 @@ describe('buildLogoutUrl', () => {
     const url = new URL(
       buildLogoutUrl({
         issuer: ISSUER,
-        clientId: 'mobula',
+        clientId: 'bifrost',
         postLogoutRedirectUri: 'http://localhost:5173/',
       }),
     )
@@ -152,7 +152,7 @@ describe('buildLogoutUrl', () => {
     expect(url.searchParams.get('post_logout_redirect_uri')).toBe(
       'http://localhost:5173/',
     )
-    expect(url.searchParams.get('client_id')).toBe('mobula')
+    expect(url.searchParams.get('client_id')).toBe('bifrost')
   })
 })
 
@@ -216,7 +216,7 @@ describe('token endpoint calls', () => {
     expect(init.method).toBe('POST')
     const body = new URLSearchParams(init.body as string)
     expect(body.get('grant_type')).toBe('authorization_code')
-    expect(body.get('client_id')).toBe('mobula')
+    expect(body.get('client_id')).toBe('bifrost')
     expect(body.get('redirect_uri')).toBe('http://localhost:5173/auth/callback')
     expect(body.get('code')).toBe('code-1')
     expect(body.get('code_verifier')).toBe('verifier-abc')

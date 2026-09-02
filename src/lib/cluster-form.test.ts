@@ -41,7 +41,7 @@ describe('canManageClusters', () => {
 })
 
 describe('isValidQuantity', () => {
-  it('accepts the K8s quantity grammar (mobula-policy parse_quantity)', () => {
+  it('accepts the K8s quantity grammar (backend policy parse_quantity)', () => {
     for (const q of ['4', '500m', '512Mi', '1Gi', '2k', '1.5', '1e3', '5n', '1Ei']) {
       expect(isValidQuantity(q)).toBe(true)
     }

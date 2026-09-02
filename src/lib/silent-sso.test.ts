@@ -10,7 +10,7 @@ import {
   wasSilentSsoAttempted,
 } from './silent-sso'
 
-const ISSUER = 'http://localhost:8090/realms/mobula'
+const ISSUER = 'http://localhost:8090/realms/bifrost'
 
 const OIDC_PROVIDERS: AuthProviders = { local: false, oidc: { issuer: ISSUER } }
 

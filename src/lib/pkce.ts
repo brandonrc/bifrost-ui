@@ -1,4 +1,5 @@
 import { issuerBase } from './auth-token'
+import { runtimeConfig } from './runtime-config'
 
 /**
  * SSO redirect sign-in: Authorization Code + PKCE (S256) directly against
@@ -18,7 +19,7 @@ import { issuerBase } from './auth-token'
  * Public client id configured on the issuer, when nothing overrides it — the
  * local Keycloak demo realm's client.
  */
-export const DEFAULT_SSO_CLIENT_ID = 'mobula'
+export const DEFAULT_SSO_CLIENT_ID = 'bifrost'
 
 /**
  * The OIDC public client id to authenticate as.
@@ -44,7 +45,11 @@ export const DEFAULT_SSO_CLIENT_ID = 'mobula'
  * deployment needs to set independently.
  */
 export function ssoClientId(): string {
-  return import.meta.env.VITE_BIFROST_SSO_CLIENT_ID || DEFAULT_SSO_CLIENT_ID
+  return (
+    runtimeConfig().ssoClientId ||
+    import.meta.env.VITE_BIFROST_SSO_CLIENT_ID ||
+    DEFAULT_SSO_CLIENT_ID
+  )
 }
 
 export interface PkceState {

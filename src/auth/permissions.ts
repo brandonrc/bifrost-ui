@@ -28,7 +28,7 @@ export function useCanManageClusters(): boolean {
 }
 
 /**
- * Role gating for service deploy/delete affordances (mobula-auth
+ * Role gating for service deploy/delete affordances (the backend auth package
  * `Role::grants` on `Target::Service`: deploying a Serve app is "code", so
  * Developer or Admin — the mirror image of clusters). Reads are Viewer+ and
  * never gated; fails closed on null identity.

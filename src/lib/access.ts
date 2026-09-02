@@ -83,7 +83,7 @@ export function emptyUserForm(): UserFormState {
 export const MIN_PASSWORD_LENGTH = 8
 
 /**
- * Client-side mirror of `mobula_core::pool::is_k8s_name` (RFC 1123
+ * Client-side mirror of the backend `IsK8sName` (RFC 1123
  * subdomain): lowercase alphanumerics, `-` and `.`, starts/ends
  * alphanumeric, ≤253 chars. Server stays authoritative; this renders the
  * same 400 inline.

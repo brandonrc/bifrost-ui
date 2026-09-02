@@ -59,7 +59,7 @@ export function emptyClusterForm(): ClusterFormState {
 
 /**
  * Client-side mirror of the backend's quantity grammar
- * (`mobula-policy::parse_quantity`): a non-negative number (exponent
+ * (the backend policy quantity parser): a non-negative number (exponent
  * notation allowed) with an optional K8s suffix — binary `Ki`…`Ei` or
  * decimal `n`, `u`, `m`, `k`, `M`…`E`. The server stays authoritative; this
  * exists to render the same 400s inline.

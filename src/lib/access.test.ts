@@ -67,7 +67,7 @@ describe('roleMappingRows / mappingsNote', () => {
   })
 })
 
-describe('isValidUsername (mirrors mobula_core is_k8s_name)', () => {
+describe('isValidUsername (mirrors the backend is_k8s_name)', () => {
   it('accepts RFC 1123 subdomains', () => {
     expect(isValidUsername('admin')).toBe(true)
     expect(isValidUsername('ml-eng.jane')).toBe(true)

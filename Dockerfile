@@ -6,7 +6,7 @@
 # The typed API client comes from GitHub Packages, which is what package.json
 # and package-lock.json already declare (@brandonrc/bifrost-client). This
 # replaces an older vendored-copy dance that installed the client from
-# ./vendor/mobula-client to avoid needing npm auth; that path is gone because
+# ./vendor/bifrost-client to avoid needing npm auth; that path is gone because
 # the package it named no longer exists, the directory it read was never
 # tracked in git (so the build failed outside one developer's machine), and the
 # script that generated it lives in the retired Rust repo. Overriding the
