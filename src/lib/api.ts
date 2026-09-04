@@ -106,11 +106,28 @@ export type Role = 'viewer' | 'developer' | 'operator' | 'admin'
  * until it is. Note `roles` is a list (a caller can hold several) — matching
  * the backend's `Vec<Role>`.
  */
+/** One project the caller holds a scoped grant in (`GET /api/v1/identity`). */
+export interface ProjectGrant {
+  name: string
+  roles: Role[]
+}
+
 export interface Identity {
   subject: string
   email?: string
   groups: string[]
+  /**
+   * The caller's *global* roles. A user whose only grant is on a project is
+   * not in here — see `projects`, and see `holdsRole` before gating anything
+   * on this field alone.
+   */
   roles: Role[]
+  /**
+   * The projects the caller holds scoped grants in, with the roles held
+   * there. Absent on a control plane older than contract 0.3.0, so treat it
+   * as optional and fall back to `roles`.
+   */
+  projects?: ProjectGrant[]
 }
 
 /**

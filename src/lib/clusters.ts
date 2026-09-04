@@ -1,15 +1,22 @@
 import { clusterViewState } from './api'
+import { holdsRole } from './identity'
 import type { ClusterView, Identity } from './api'
 
 /**
  * Cluster lifecycle mutations (create, terminate) need `Write`/`Delete` on
- * `Target::Cluster` — Operator or Admin only (api-v1.md §2.2, ADR-0009).
- * Developer is deliberately code-but-not-lifecycle (open question Q9 in the
- * UI spec). Reads are Viewer+ and never gated. Fails closed on null identity.
+ * `Target::Cluster` — Operator or Admin (api-v1.md §2.2, ADR-0009). Developer
+ * is deliberately code-but-not-lifecycle. Reads are Viewer+ and never gated.
+ * Fails closed on null identity.
+ *
+ * A grant counts wherever it is held. This used to read `identity.roles`
+ * alone, which lists *global* roles only, so a project operator — the ordinary
+ * self-serve user, whose grant comes from a group or an assignment scoped to
+ * their project — was shown "Operator or Admin role required" for a cluster
+ * the control plane would have let them create. The dashboard was guessing at
+ * authority the server can state; `identity.projects` is that statement.
  */
 export function canManageClusters(identity: Identity | null): boolean {
-  if (!identity) return false
-  return identity.roles.includes('operator') || identity.roles.includes('admin')
+  return holdsRole(identity, ['operator', 'admin'])
 }
 
 /**
