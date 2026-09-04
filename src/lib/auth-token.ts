@@ -146,6 +146,12 @@ export function identityFromToken(token: string, now = Date.now()): Identity | n
  * matches one deployment's group names. Roles decide what admin UI the
  * caller sees, so they must come from the server, not client-side parsing.
  *
+ * The same is true of `projects` — where the caller may act, which the server
+ * computes from group mappings and stored assignments together. It is carried
+ * for the same reason and was once left behind: the gates read it, found
+ * nothing, and told a project operator they needed a role they held, because
+ * this overlay copied `roles` alone.
+ *
  * Display fields (subject, email, groups) stay from the token decode: the
  * decoded `preferred_username` is friendlier than the backend subject (the
  * raw `sub`, a UUID for Keycloak). When no server identity is available yet
@@ -157,7 +163,7 @@ export function withReportedRoles(
   reported: Identity | null | undefined,
 ): Identity {
   if (reported == null) return base
-  return { ...base, roles: reported.roles }
+  return { ...base, roles: reported.roles, projects: reported.projects }
 }
 
 export type SessionSource = 'sso' | 'local' | 'pat' | 'dev' | 'none'

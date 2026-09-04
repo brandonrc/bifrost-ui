@@ -97,7 +97,22 @@ describe('withReportedRoles', () => {
       email: 'admin@example.com',
       groups: ['bifrost-admins', 'team-a'],
       roles: ['admin'], // authorization comes from the server
+      projects: undefined, // nothing reported, nothing invented
     })
+  })
+
+  it('carries where the caller may act, not only what they are', () => {
+    // The overlay used to copy `roles` alone, so a caller whose only grant is
+    // on a project arrived at the gates with nothing: the dashboard told a
+    // project operator they needed an operator role. Caught in a browser,
+    // against the live deployment, because every unit here still passed.
+    const merged = withReportedRoles(base, {
+      subject: 'uuid',
+      groups: ['team-a'],
+      roles: [],
+      projects: [{ name: 'team-a', roles: ['operator'] }],
+    })
+    expect(merged.projects).toEqual([{ name: 'team-a', roles: ['operator'] }])
   })
 
   it('keeps display fields (subject, email, groups) from the token', () => {
