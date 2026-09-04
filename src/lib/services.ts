@@ -1,3 +1,4 @@
+import { holdsRole } from './identity'
 import type { Identity, ServiceView } from './api'
 import { isClusterState, type ClusterState } from './cluster-state'
 
@@ -8,8 +9,8 @@ import { isClusterState, type ClusterState } from './cluster-state'
  * never gated. Fails closed on null identity.
  */
 export function canManageServices(identity: Identity | null): boolean {
-  if (!identity) return false
-  return identity.roles.includes('developer') || identity.roles.includes('admin')
+  // Held globally or in any project — same reasoning as canManageClusters.
+  return holdsRole(identity, ['developer', 'admin'])
 }
 
 /**
