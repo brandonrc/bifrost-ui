@@ -25,3 +25,7 @@ dist-ssr
 
 # Generated typed client (deploy/up.sh) — vendored only for the docker build
 vendor/
+
+# Browser-test artifacts (e2e/)
+e2e/test-results/
+e2e/playwright-report/
