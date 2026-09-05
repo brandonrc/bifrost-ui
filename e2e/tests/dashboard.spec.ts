@@ -285,6 +285,41 @@ test.describe('the signed-in dashboard', () => {
     }
   })
 
+  test('a terminated cluster is hidden behind the toggle, not lost', async ({
+    page,
+  }) => {
+    // Tombstones are the one thing the table is allowed to withhold, and the
+    // toggle is the promise that it withheld rather than dropped them. Only
+    // on the local stack: this makes a cluster in order to kill it.
+    test.skip(LIVE, 'creates and deletes a cluster; not on a real deployment')
+
+    await signIn(page, ADMIN)
+    const id = 'e2e-seed-dead'
+    await seedCluster(page, id, OPERATOR.project)
+    await page.evaluate(
+      async ({ key, id }) => {
+        await fetch(`/api/v1/clusters/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${window.localStorage.getItem(key)}` },
+        })
+      },
+      { key: TOKEN_KEY, id },
+    )
+
+    await page.goto(`${UI}/clusters`)
+    await expect(page.getByRole('heading', { name: 'Clusters' })).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: id, exact: true }),
+      'a terminated cluster should not be in the default list',
+    ).toHaveCount(0)
+
+    await page.getByText(/show terminated/i).click()
+    await expect(
+      page.getByRole('link', { name: id, exact: true }),
+      'the toggle should bring back the record the API still holds',
+    ).toBeVisible()
+  })
+
   test('signing out ends the session', async ({ page }) => {
     await signIn(page, ADMIN)
     expect(
