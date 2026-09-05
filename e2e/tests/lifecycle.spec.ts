@@ -151,22 +151,25 @@ test.describe('the dashboard starts and stops a cluster', () => {
       }
 
       // Terminate is accepted, not instant: the record is tombstoned and the
-      // reconciler reaps.
-      //
-      // The badge again, and deliberately not "the row is gone from the list":
-      // an absence is exactly what an unrendered page also looks like, so that
-      // assertion passes whether or not anything happened. This one has to be
-      // rendered to be true.
-      const goneBadge = page.getByTitle(/Terminal state|being torn down/).first();
-      await expect(goneBadge).toBeVisible({ timeout: 300_000 });
+      // reconciler reaps. The app routes back to the list once the control
+      // plane has taken the request, which is the first thing to wait for.
+      await expect(page.getByRole('heading', { name: 'Clusters' })).toBeVisible({
+        timeout: 60_000,
+      });
 
-      // And the list stops offering it — checked after the page above has
-      // proved itself alive, so the empty result means what it says.
-      await page.goto(`${UI}/clusters`);
-      await expect(page.getByRole('heading', { name: 'Clusters' })).toBeVisible();
+      // It is no longer offered among the live clusters.
       await expect(page.getByRole('link', { name: id, exact: true })).toHaveCount(0, {
         timeout: 120_000,
       });
+
+      // And it is hidden rather than lost — asserted on the record's own page,
+      // and deliberately not as "the row is gone": an absence is also what an
+      // unrendered page looks like, so that alone passes whether or not
+      // anything happened. A badge has to be rendered to be true.
+      await page.goto(`${UI}/clusters/${id}`);
+      await expect(
+        page.getByTitle(/Terminal state|being torn down/).first(),
+      ).toBeVisible({ timeout: 300_000 });
     } finally {
       // The belt: whatever the browser did or failed to do, this cluster is
       // not left running on a shared deployment. Deleted through the page's
