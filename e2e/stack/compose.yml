@@ -21,6 +21,7 @@ services:
       # writes into every token is the string Bifrost checks.
       KC_HOSTNAME: http://keycloak.localtest.me:5181
       KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "127.0.0.1:5181:5181"
     networks:
@@ -28,12 +29,25 @@ services:
         aliases: [keycloak.localtest.me]
     volumes:
       - ./realm.json:/opt/keycloak/data/import/realm.json:ro
+    # The image has no curl, so this speaks HTTP to the management port over
+    # bash's /dev/tcp. It is what makes the start order deterministic: Bifrost
+    # fetches discovery at startup and dies if the realm is not there yet.
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '\"status\": \"UP\"'",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
 
   bifrost:
     image: ghcr.io/brandonrc/bifrost:${BIFROST_IMAGE_TAG:-latest}
-    depends_on: [keycloak]
-    # Discovery and the first JWKS fetch happen at startup and are fatal, so
-    # this exits until Keycloak answers. Restarting is the wait.
+    depends_on:
+      keycloak:
+        condition: service_healthy
     restart: unless-stopped
     # API only: no --namespace, so no controller and no Kubernetes. Everything
     # these specs assert — what a token carries, who may do what, what the
@@ -53,6 +67,12 @@ services:
   ui:
     image: nginxinc/nginx-unprivileged:1.27-alpine
     depends_on: [bifrost]
+    # nginx resolves its upstream once, at startup, and exits if the name does
+    # not resolve — and a container that is restarting has no DNS record. That
+    # is exactly what a cold CI runner produced: "host not found in upstream
+    # bifrost". The healthcheck above orders the start; this survives the
+    # remaining race.
+    restart: unless-stopped
     ports:
       - "127.0.0.1:5180:8080"
     volumes:
