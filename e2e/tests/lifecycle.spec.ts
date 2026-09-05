@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 
-import { ISSUER, LIVE, OPERATOR, UI } from '../env'
+import { LIVE, OPERATOR, UI } from '../env'
+import { signIn, TOKEN_KEY } from '../signin'
 
 /**
  * A cluster started and stopped through the dashboard, by a project operator,
@@ -45,16 +46,7 @@ test.describe('the dashboard starts and stops a cluster', () => {
     const id = `ui-e2e-${Date.now().toString(36)}`;
     const user = OPERATOR;
 
-    await page.goto(`${UI}/login`);
-    await page.getByRole('button', { name: /sign in with sso/i }).click();
-    await page.waitForURL((url) => url.href.startsWith(new URL(ISSUER).origin));
-    await page.getByLabel(/username|email/i).fill(user.username);
-    await page.getByLabel(/password/i).fill(user.password);
-    await page.getByRole('button', { name: /sign in|log in/i }).click();
-    await page.waitForURL((url) => url.href.startsWith(UI));
-    await expect(
-      page.locator('header').getByText(user.username, { exact: true }).first(),
-    ).toBeVisible({ timeout: 20_000 });
+    await signIn(page, user);
 
     try {
       await page.goto(`${UI}/clusters/new`);
@@ -110,32 +102,45 @@ test.describe('the dashboard starts and stops a cluster', () => {
       // being created", the reconcile blurb), so a text match went green in
       // forty seconds against a cluster that was still provisioning. A test
       // that cannot fail is worse than no test.
+      //
+      // No reloading, because the page refetches itself every 15 seconds and
+      // because a poll built on reloads is wrong twice over: `count()` runs
+      // the instant the load event fires, before React has rendered anything,
+      // so it answered 0 for ten solid minutes while the badge was on screen
+      // the whole time. An auto-waiting assertion has neither problem.
       await page.goto(`${UI}/clusters/${id}`);
       const runningBadge = page
         .getByTitle('Cluster is healthy and accepting work.')
         .first();
-      await expect
-        .poll(
-          async () => {
-            await page.reload();
-            return runningBadge.count();
-          },
-          { timeout: 600_000, intervals: [15_000] },
-        )
-        .toBeGreaterThan(0);
+      await expect(runningBadge).toBeVisible({ timeout: 600_000 });
       await expect(runningBadge).toHaveText('Running');
 
       // And the control plane agrees, so a page that renders the right word
       // for the wrong reason still fails.
-      const observed = await page.evaluate(async (cluster) => {
-        const r = await fetch(`/api/v1/clusters/${cluster}`, {
-          headers: {
-            Authorization: `Bearer ${window.localStorage.getItem('bifrost.token')}`,
-          },
-        });
-        return (await r.json()).observed_state;
-      }, id);
-      expect(observed).toBe('running');
+      const observed = await page.evaluate(
+        async ({ cluster, key }) => {
+          const r = await fetch(`/api/v1/clusters/${cluster}`, {
+            headers: { Authorization: `Bearer ${window.localStorage.getItem(key)}` },
+          });
+          const body = await r.text();
+          let state: unknown
+          try {
+            state = JSON.parse(body).observed_state
+          } catch {
+            state = undefined
+          }
+          // The status and body travel with the answer: this call is made with
+          // the token the SPA holds, and a bearer that has aged out mid-test
+          // must not look like a cluster that failed to converge.
+          return { status: r.status, state, body: body.slice(0, 200) };
+        },
+        { cluster: id, key: TOKEN_KEY },
+      );
+      expect(observed.status, `GET /api/v1/clusters/${id}: ${observed.body}`).toBe(200);
+      expect(
+        observed.state,
+        `GET /api/v1/clusters/${id} answered ${observed.status}: ${observed.body}`,
+      ).toBe('running');
 
       await page.getByRole('button', { name: 'Terminate' }).click();
       // A destructive control may ask; either shape is fine, and a missing
@@ -146,30 +151,36 @@ test.describe('the dashboard starts and stops a cluster', () => {
       }
 
       // Terminate is accepted, not instant: the record is tombstoned and the
-      // reconciler reaps. What the page must not do is keep offering it.
+      // reconciler reaps.
+      //
+      // The badge again, and deliberately not "the row is gone from the list":
+      // an absence is exactly what an unrendered page also looks like, so that
+      // assertion passes whether or not anything happened. This one has to be
+      // rendered to be true.
+      const goneBadge = page.getByTitle(/Terminal state|being torn down/).first();
+      await expect(goneBadge).toBeVisible({ timeout: 300_000 });
+
+      // And the list stops offering it — checked after the page above has
+      // proved itself alive, so the empty result means what it says.
       await page.goto(`${UI}/clusters`);
-      await expect
-        .poll(
-          async () => {
-            await page.reload();
-            return page.getByRole('link', { name: id, exact: true }).count();
-          },
-          { timeout: 300_000, intervals: [10_000] },
-        )
-        .toBe(0);
+      await expect(page.getByRole('heading', { name: 'Clusters' })).toBeVisible();
+      await expect(page.getByRole('link', { name: id, exact: true })).toHaveCount(0, {
+        timeout: 120_000,
+      });
     } finally {
       // The belt: whatever the browser did or failed to do, this cluster is
       // not left running on a shared deployment. Deleted through the page's
       // own origin with the session's bearer, so it needs no second identity.
       await page
-        .evaluate(async (cluster) => {
-          await fetch(`/api/v1/clusters/${cluster}`, {
-            method: 'DELETE',
-            headers: {
-              Authorization: `Bearer ${window.localStorage.getItem('bifrost.token')}`,
-            },
-          }).catch(() => undefined);
-        }, id)
+        .evaluate(
+          async ({ cluster, key }) => {
+            await fetch(`/api/v1/clusters/${cluster}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${window.localStorage.getItem(key)}` },
+            }).catch(() => undefined);
+          },
+          { cluster: id, key: TOKEN_KEY },
+        )
         .catch(() => undefined);
     }
   });

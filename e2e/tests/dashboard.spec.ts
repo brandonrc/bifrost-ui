@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 
 import { ADMIN, ISSUER, LIVE, OPERATOR, REALM, SPA_CLIENT_ID, UI } from '../env'
+import { signIn, TOKEN_KEY } from '../signin'
 
 /**
  * The dashboard past the sign-in page.
@@ -18,31 +19,6 @@ import { ADMIN, ISSUER, LIVE, OPERATOR, REALM, SPA_CLIENT_ID, UI } from '../env'
  * shows an empty list. Neither failure names its cause. The realm this stack
  * imports has both, so a regression in either is a red test here.
  */
-const TOKEN_KEY = 'bifrost.token'
-
-async function signIn(
-  page: Page,
-  user: { username: string; password: string },
-): Promise<void> {
-  await page.goto(`${UI}/login`)
-  await page.getByRole('button', { name: /sign in with sso/i }).click()
-  await page.waitForURL((url) => url.href.startsWith(new URL(ISSUER).origin))
-  // Keycloak's form by id, not by label: the password field's label also
-  // names a "Show password" button, and the two are not interchangeable.
-  await expect(page.locator('#username')).toBeVisible()
-  await page.locator('#username').fill(user.username)
-  await page.locator('#password').fill(user.password)
-  await Promise.all([
-    page.waitForURL((url) => url.href.startsWith(UI), { timeout: 30_000 }),
-    page.locator('#kc-login').click(),
-  ])
-  // The shell shows who is signed in once the callback has exchanged the code;
-  // navigating before that loses the session.
-  await expect(
-    page.locator('header').getByText(user.username, { exact: true }).first(),
-  ).toBeVisible({ timeout: 20_000 })
-}
-
 /** Only the claims these specs assert on; the token carries more. */
 interface TokenClaims {
   iss?: string
