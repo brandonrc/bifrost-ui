@@ -1,0 +1,86 @@
+# The stack the pull-request lane drives: Keycloak, Bifrost, and this SPA
+# served the way the image serves it.
+#
+# The one subtlety is the Keycloak hostname. A token's `iss` is compared as a
+# string, so the browser and Bifrost must reach the IdP by the *same* URL —
+# and "localhost" cannot be that URL, because inside a container it is the
+# container. `*.localtest.me` resolves to 127.0.0.1 in public DNS, and a
+# network alias makes the same name resolve to the Keycloak container inside
+# the compose network. One issuer string, correct from both sides, with no
+# /etc/hosts edit and no host networking (which is Linux-only).
+name: bifrost-ui-e2e
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--http-port=5181", "--import-realm"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      # Pinned rather than derived from the request Host: the issuer this
+      # writes into every token is the string Bifrost checks.
+      KC_HOSTNAME: http://keycloak.localtest.me:5181
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "127.0.0.1:5181:5181"
+    networks:
+      default:
+        aliases: [keycloak.localtest.me]
+    volumes:
+      - ./realm.json:/opt/keycloak/data/import/realm.json:ro
+    # The image has no curl, so this speaks HTTP to the management port over
+    # bash's /dev/tcp. It is what makes the start order deterministic: Bifrost
+    # fetches discovery at startup and dies if the realm is not there yet.
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '\"status\": \"UP\"'",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 10s
+
+  bifrost:
+    image: ghcr.io/brandonrc/bifrost:${BIFROST_IMAGE_TAG:-latest}
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    restart: unless-stopped
+    # API only: no --namespace, so no controller and no Kubernetes. Everything
+    # these specs assert — what a token carries, who may do what, what the
+    # pages render — is answered by the API alone. A cluster that really
+    # converges is the live lane's job.
+    command:
+      - serve
+      - --bind=0.0.0.0:8484
+      - --store=memory
+      - --auth-config=/etc/bifrost/auth.json
+      # Plaintext http:// to the IdP is the point of a local stack; the guard
+      # that refuses it exists for deployments.
+      - --allow-insecure-transport
+    volumes:
+      - ./auth-config.json:/etc/bifrost/auth.json:ro
+
+  ui:
+    image: nginxinc/nginx-unprivileged:1.27-alpine
+    depends_on: [bifrost]
+    # nginx resolves its upstream once, at startup, and exits if the name does
+    # not resolve — and a container that is restarting has no DNS record. That
+    # is exactly what a cold CI runner produced: "host not found in upstream
+    # bifrost". The healthcheck above orders the start; this survives the
+    # remaining race.
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5180:8080"
+    volumes:
+      # The repository's own nginx.conf, not a copy: if the shipped proxy
+      # rules break, this lane breaks with them.
+      - ../../nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # `dist` plus `config.json`, staged into one directory by up.sh. A
+      # second bind *inside* a read-only bind cannot create its mountpoint,
+      # and making dist writable so it could would have the container write
+      # into the build output.
+      - ./.www:/usr/share/nginx/html:ro

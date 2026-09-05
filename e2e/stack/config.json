@@ -1,0 +1,4 @@
+{
+  "ssoClientId": "bifrost-ui-spa",
+  "issuer": "http://keycloak.localtest.me:5181/realms/bifrost-e2e"
+}

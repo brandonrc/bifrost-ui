@@ -1,0 +1,16 @@
+{
+  "issuer": "http://keycloak.localtest.me:5181/realms/bifrost-e2e",
+  "audience": "bifrost-ui-spa",
+  "groups_claim": "groups",
+  "roles": {
+    "admin": ["/bifrost-admins"],
+    "operator": [],
+    "developer": [],
+    "viewer": [],
+    "auditor": []
+  },
+  "project_roles": {
+    "operator": ["*"],
+    "strip_prefix": "/"
+  }
+}

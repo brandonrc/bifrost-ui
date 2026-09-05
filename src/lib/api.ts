@@ -348,15 +348,27 @@ export interface LocalLoginResponse {
 }
 
 /**
- * A `ClusterView`'s state for display. The backend's `observed_state` is
- * null until the reconciler first observes the cluster, so fall back to the
- * `desired` state, then to `pending`. Every cluster badge in the UI routes
+ * A `ClusterView`'s state for display. Every cluster badge in the UI routes
  * through here so the mapping from the wire shape to the nine renderable
  * `ClusterState`s lives in exactly one place.
+ *
+ * `observed_state` is null until the reconciler first observes the cluster.
+ * What is NOT an answer for that gap is `desired`: it is the operator's
+ * intent ("running" | "suspended" | "terminated"), not a lifecycle state, and
+ * rendering it as one told users their brand-new cluster was Running —
+ * "healthy and accepting work" — while nothing had yet looked at it. Caught
+ * by a browser test whose next assertion asked the API and was told
+ * `observed_generation: 0`.
+ *
+ * Unobserved means `pending`, which is exactly what its badge says: waiting
+ * for the provisioner to pick up the spec. The one intent worth rendering is
+ * `terminated` — a record whose spec says terminated is a tombstone whether
+ * or not anything ever reconciled it, and the list partition depends on
+ * seeing it as one.
  */
 export function clusterViewState(view: ClusterView): ClusterState {
   if (isClusterState(view.observedState)) return view.observedState
-  if (isClusterState(view.desired)) return view.desired
+  if (view.desired === 'terminated') return 'terminated'
   return 'pending'
 }
 

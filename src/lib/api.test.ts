@@ -102,16 +102,28 @@ describe('clusterViewState', () => {
     ).toBe('running')
   })
 
-  it('falls back to desired before the cluster is first observed', () => {
-    expect(clusterViewState(view({ observedState: null, desired: 'provisioning' }))).toBe(
-      'provisioning',
+  it('is pending until the reconciler has observed the cluster', () => {
+    // `desired` is intent, not a lifecycle state. Rendering it as one made a
+    // cluster that nothing had touched yet claim to be Running, tooltip and
+    // all ("healthy and accepting work") — the badge a user reads before
+    // pointing a job at it.
+    expect(clusterViewState(view({ observedState: null, desired: 'running' }))).toBe(
+      'pending',
     )
-    expect(clusterViewState(view({ observedState: undefined, desired: 'terminating' }))).toBe(
-      'terminating',
+    expect(clusterViewState(view({ observedState: undefined, desired: 'suspended' }))).toBe(
+      'pending',
     )
   })
 
-  it('falls back to pending when neither is a known state', () => {
+  it('still reads an unobserved terminated record as a tombstone', () => {
+    // The list partition hides tombstones behind a toggle, and a record whose
+    // spec says terminated is one whether or not anything reconciled it.
+    expect(clusterViewState(view({ observedState: null, desired: 'terminated' }))).toBe(
+      'terminated',
+    )
+  })
+
+  it('falls back to pending when observed_state is not a known state', () => {
     expect(clusterViewState(view({ observedState: 'gibberish', desired: 'nonsense' }))).toBe(
       'pending',
     )
